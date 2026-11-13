@@ -56,9 +56,70 @@ def test_sample_images_list_is_empty_by_default():
     assert client.get("/sample-images").json() == []
 
 
+def test_analyze_image_response_carries_an_optional_skin_model_field():
+    """skin_model is None when onnxruntime/the model aren't available, or a
+    well-formed classification -- never missing, never half-filled."""
+    body = client.post("/analyze-image", json={"image_base64": "AAAA"}).json()
+    assert "skin_model" in body
+    if body["skin_model"] is not None:
+        assert body["skin_model"]["label"]
+        assert 0.0 <= body["skin_model"]["confidence"] <= 1.0
+        assert len(body["skin_model"]["top3"]) == 3
+        assert body["skin_model"]["disclaimer"]
+
+
+def test_skin_classifier_returns_none_for_undecodable_image_bytes():
+    from app.services import skin_classifier
+
+    assert skin_classifier.classify(b"not an image") is None
+
+
+def test_skin_classifier_classifies_a_real_photo():
+    """Skipped where onnxruntime isn't installed -- classify() still degrades
+    to None in that case, covered by the test above."""
+    import pytest
+
+    pytest.importorskip("onnxruntime")
+    from io import BytesIO
+
+    from PIL import Image
+
+    from app.services import skin_classifier
+
+    buffer = BytesIO()
+    Image.new("RGB", (300, 300), color=(180, 140, 120)).save(buffer, format="JPEG")
+    result = skin_classifier.classify(buffer.getvalue())
+    assert result is not None
+    assert result.label in {"Acne Vulgaris", "Eczema", "Fungal Infection", "Psoriasis", "Normal Skin"}
+    assert 0.0 <= result.confidence <= 1.0
+    assert len(result.top3) == 3
+
+
 def test_search_ranks_by_shared_words(monkeypatch):
     chunks = [{"title": "a.md", "snippet": "Bone loss in microgravity", "words": {"bone", "loss", "microgravity"}},
               {"title": "b.md", "snippet": "Radiation exposure limits", "words": {"radiation", "exposure", "limits"}}]
     monkeypatch.setattr(rag, "load_chunks", lambda: chunks)
     assert rag.search("bone loss")[0]["title"] == "a.md"
     assert rag.search("unrelated question about sleep") == []
+
+
+def test_search_falls_back_to_keywords_when_the_real_engine_is_unavailable(monkeypatch):
+    """The heavy rag/ engine isn't installed in this test environment, so
+    search() must use the keyword fallback without raising."""
+    monkeypatch.setattr(rag, "_hybrid_search_fn", lambda: None)
+    chunks = [{"title": "a.md", "snippet": "Bone loss in microgravity", "words": {"bone", "loss", "microgravity"}}]
+    monkeypatch.setattr(rag, "load_chunks", lambda: chunks)
+    assert rag.search("bone loss") == [{"title": "a.md", "snippet": "Bone loss in microgravity"}]
+
+
+def test_search_uses_the_real_engine_when_available(monkeypatch):
+    """When rag/'s hybrid_search is importable, its chunks are converted to
+    the same {title, snippet} shape the keyword fallback returns."""
+    def fake_hybrid_search(question, k=None):
+        return [{"filename": "human-adaptation.pdf", "page": 12,
+                  "text": "human-adaptation.pdf | Page 12\n\nMicrogravity causes bone density loss.",
+                  "score": 0.9}]
+
+    monkeypatch.setattr(rag, "_hybrid_search_fn", lambda: fake_hybrid_search)
+    result = rag.search("bone density", top_k=1)
+    assert result == [{"title": "human-adaptation.pdf (p.12)", "snippet": "Microgravity causes bone density loss."}]

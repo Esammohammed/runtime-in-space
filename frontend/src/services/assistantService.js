@@ -11,7 +11,7 @@ export const ask = (crewId, question, history = []) =>
 
 export const analyzeImage = (crewId, imageBase64, mimeType, note) =>
   USE_MOCK
-    ? Promise.resolve({ description: '[mock] Photo analysis appears here.', next_step: 'Connect the backend.', urgency: 'watch', model: 'mock' })
+    ? Promise.resolve({ description: '[mock] Photo analysis appears here.', next_step: 'Connect the backend.', urgency: 'watch', model: 'mock', skin_model: null })
     : api.post('/assistant/analyze-image', { crew_id: crewId, image_base64: imageBase64, mime_type: mimeType, note });
 
 export const listSampleImages = () =>

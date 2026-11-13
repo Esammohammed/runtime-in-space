@@ -15,8 +15,9 @@ fixed, written protocols.
 | `core-api/` | Stores readings, judges status, builds tasks, logs events, keeps reports | 8000 | FastAPI, SQLite |
 | `simulator/` | Fake band readings: history and demo scenarios | 8001 | FastAPI |
 | `forecast/` | Early warning: forecasts one indicator series | 8002 | FastAPI |
-| `assistant/` | Chat with sources, photo analysis, reports for Earth | 8003 | FastAPI |
+| `assistant/` | Chat with sources, photo analysis (vision LLM + a vendored local skin-condition classifier), reports for Earth | 8003 | FastAPI |
 | *(anomaly service)* | On-demand anomaly check across an indicator's recent readings -- a teammate's deliverable, not in this repo yet. Core calls it and degrades gracefully if it isn't running. | 8004 | -- |
+| `rag/` | The real RAG engine: PDF ingest, BM25 + embedding hybrid search over ChromaDB. Imported in-process by `assistant/` when its dependencies are installed; the assistant falls back to a plain keyword search over `content/nasa-docs/` otherwise. Not its own network service. | -- | Python, ChromaDB, sentence-transformers |
 | `content/` | Medical content: indicators, crew, protocols, NASA documents | | JSON, Markdown |
 | `contracts/` | The request and response shape of every endpoint | | Markdown |
 
@@ -56,6 +57,61 @@ npm run dev
 ```
 
 Set `VITE_USE_MOCK=true` in `frontend/.env` to run the screens with no backend.
+
+## Turning on the real RAG engine
+
+The assistant works out of the box with a plain keyword search over
+`content/nasa-docs/`. To use the real hybrid search over the indexed PDFs
+in `rag/` instead:
+
+```bash
+cd rag
+pip install -r requirements.txt   # chromadb, sentence-transformers, torch -- a large download
+python main.py ingest             # only needed if you change the source PDFs; an index is already committed
+cd ../assistant
+pip install chromadb sentence-transformers rank-bm25 torch   # into the assistant's own venv
+uvicorn app.main:app --reload --port 8003
+```
+
+`assistant/app/services/rag.py` tries the real engine first and falls back
+to the keyword search automatically if those packages aren't installed --
+nothing breaks either way. **Not wired into `docker-compose up`**: the
+assistant's Docker build context is `assistant/` only, so `rag/` isn't
+copied into that image. Inside Docker, the assistant always uses the
+keyword fallback unless you add a volume mount and install the extra
+packages in `assistant/Dockerfile` yourself.
+
+Pick the language model for both the assistant's chat and the `rag/`
+engine's own standalone CLI/Streamlit tool independently, each via its own
+`.env` (default is mock, no config needed):
+
+```bash
+# assistant/.env -- local Ollama
+LLM_PROVIDER=openai_compatible
+LLM_BASE_URL=http://localhost:11434/v1
+LLM_MODEL=<your pulled model, e.g. qwen2.5:7b>
+
+# assistant/.env -- ChatGPT API
+LLM_PROVIDER=openai_compatible
+LLM_BASE_URL=https://api.openai.com/v1
+LLM_API_KEY=<your token>
+LLM_MODEL=gpt-4o-mini
+
+# rag/.env -- local Ollama
+RAG_LLM_PROVIDER=ollama
+RAG_OLLAMA_MODEL=<your pulled model, e.g. qwen2.5:7b>
+
+# rag/.env -- ChatGPT API
+RAG_LLM_PROVIDER=openai
+RAG_OPENAI_API_KEY=<your token>
+```
+
+Ollama exposes an OpenAI-compatible endpoint, which is why the assistant
+needs no separate "ollama" provider value -- `openai_compatible` plus a
+local `LLM_BASE_URL` already is Ollama. `rag/`'s own standalone tool
+(`python rag/main.py query ...`, or `streamlit run rag/app.py`) talks to
+Ollama's native API by default, so it has its own explicit provider switch.
+Never commit a real API key -- `.env` is gitignored, `.env.example` isn't.
 
 ## Demo flow
 
@@ -108,6 +164,13 @@ itself (offline-first, fixed protocols), not by a simulated indicator.
 - The assistant chat is multi-turn but session-only: history lives in the
   browser tab, not the database, and resets on reload. Photo analysis is a
   separate one-shot page (`/photo-check`), not part of the chat.
+- Photo analysis runs two independent signals: the vision LLM (description,
+  next step, urgency) and a local, vendored five-class skin-condition
+  classifier (`assistant/app/services/skin_classifier.py`, model files under
+  `assistant/app/ml/skin_model/`, sourced from a third-party educational
+  project -- see its `NOTICE.md`). Offline, no network calls, degrades to
+  `skin_model: null` when its dependencies or model file aren't present.
+  Experimental, not a diagnosis -- see `contracts/README.md`.
 - The forecast service ships a simple linear baseline. Chronos plugs in behind
   the same interface.
 - The assistant ships a mock model. A hosted or local model is a config change.
