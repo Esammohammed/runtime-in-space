@@ -189,3 +189,7 @@ cd simulator && pytest
 cd forecast && pytest
 cd assistant && pytest
 ```
+
+<!-- CHECKPOINT id="ckpt_mwfk33pi_0r1inv" time="2026-11-13T22:36:14.598Z" note="auto" fixes=0 questions=0 highlights=0 sections="" -->
+
+<!-- CHECKPOINT id="ckpt_mwfkfyo6_vgoq3s" time="2026-11-13T22:46:14.598Z" note="auto" fixes=0 questions=0 highlights=0 sections="" -->
