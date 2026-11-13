@@ -4,7 +4,12 @@ import AppRoutes from '@/routes/AppRoutes.jsx';
 
 function Gate() {
   const { identityConfirmed, loading } = useCrew();
-  if (!loading && identityConfirmed) return <AppRoutes />;
+  const isEmergencyRoute = typeof window !== 'undefined' && window.location.pathname.startsWith('/emergency');
+
+  if (isEmergencyRoute || (!loading && identityConfirmed)) {
+    return <AppRoutes />;
+  }
+
   return (
     <div className="page">
       <IdentityPage />
