@@ -1,3 +1,4 @@
+import base64
 import json
 
 from fastapi import APIRouter, HTTPException
@@ -5,7 +6,7 @@ from fastapi.responses import FileResponse
 
 from app.core.config import get_settings
 from app.schemas.assistant import AnalyzeImageIn, AnalyzeImageOut
-from app.services import prompts
+from app.services import prompts, skin_classifier
 from app.services.llm import LLMError, get_llm
 
 router = APIRouter(tags=["image"])
@@ -49,4 +50,9 @@ def analyze_image(request: AnalyzeImageIn):
             urgency = "show_officer"
     except (json.JSONDecodeError, KeyError, TypeError):
         description, next_step, urgency = raw, "Show this to the crew medical officer.", "show_officer"
-    return AnalyzeImageOut(description=description, next_step=next_step, urgency=urgency, model=llm.name)
+    try:
+        skin_model = skin_classifier.classify(base64.b64decode(request.image_base64))
+    except Exception:  # malformed base64, e.g. -- classify() handles decode-able-but-bad images itself
+        skin_model = None
+    return AnalyzeImageOut(description=description, next_step=next_step, urgency=urgency, model=llm.name,
+                            skin_model=skin_model)

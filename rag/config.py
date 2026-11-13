@@ -56,10 +56,21 @@ SEMANTIC_WEIGHT = float(os.getenv("RAG_SEMANTIC_WEIGHT", "0.65"))
 HYBRID_POOL = int(os.getenv("RAG_HYBRID_POOL", "20"))
 
 # ---------------------------------------------------------------------------
-# Generation (Ollama)
+# Generation
 # ---------------------------------------------------------------------------
+# "ollama" talks to a local Ollama server -- set OLLAMA_MODEL to whichever
+# model you've pulled (qwen2.5:7b, llama3.1:8b, mistral:7b, ...). "openai"
+# talks to the real ChatGPT API (or any OpenAI-compatible endpoint) -- set
+# OPENAI_API_KEY to your token. Switching provider needs no code change.
+LLM_PROVIDER = os.getenv("RAG_LLM_PROVIDER", "ollama")  # "ollama" | "openai"
+
 OLLAMA_MODEL = os.getenv("RAG_OLLAMA_MODEL", "qwen2.5:7b")
 OLLAMA_URL = os.getenv("RAG_OLLAMA_URL", "http://localhost:11434/api/chat")
+
+OPENAI_MODEL = os.getenv("RAG_OPENAI_MODEL", "gpt-4o-mini")
+OPENAI_BASE_URL = os.getenv("RAG_OPENAI_BASE_URL", "https://api.openai.com/v1")
+OPENAI_API_KEY = os.getenv("RAG_OPENAI_API_KEY", "")
+
 LLM_TEMPERATURE = float(os.getenv("RAG_LLM_TEMPERATURE", "0"))
 LLM_NUM_CTX = int(os.getenv("RAG_LLM_NUM_CTX", "4096"))
 LLM_TIMEOUT = int(os.getenv("RAG_LLM_TIMEOUT", "300"))

@@ -94,6 +94,19 @@ export default function PhotoCheckPage() {
           <p><strong>Urgency:</strong> {URGENCY_LABELS[result.urgency] ?? result.urgency}</p>
         </Card>
       )}
+      {result?.skin_model && (
+        <Card title="Skin model (experimental)" aside={`${Math.round(result.skin_model.confidence * 100)}%`}>
+          <p>
+            <strong>{result.skin_model.label}</strong>
+          </p>
+          <ul className="muted small">
+            {result.skin_model.top3.map((item) => (
+              <li key={item.label}>{item.label}: {Math.round(item.confidence * 100)}%</li>
+            ))}
+          </ul>
+          <p className="muted small">{result.skin_model.disclaimer}</p>
+        </Card>
+      )}
     </>
   );
 }

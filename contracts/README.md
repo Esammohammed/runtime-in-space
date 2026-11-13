@@ -160,11 +160,35 @@ starts a new conversation.
 { "image_base64": "<base64>", "mime_type": "image/jpeg", "note": "rash on forearm" }
 ```
 
-Response: `{ "description": "...", "next_step": "...", "urgency": "show_officer", "model": "mock" }`
+Response:
+
+```json
+{
+  "description": "...", "next_step": "...", "urgency": "show_officer", "model": "mock",
+  "skin_model": {
+    "label": "Eczema", "confidence": 0.74,
+    "top3": [{ "label": "Eczema", "confidence": 0.74 }, { "label": "Normal Skin", "confidence": 0.15 },
+             { "label": "Acne Vulgaris", "confidence": 0.06 }],
+    "disclaimer": "Experimental prototype model, not a medical diagnosis. ..."
+  }
+}
+```
 
 `urgency` is one of `watch`, `show_officer`, `alert_ground`. It defaults to
-`show_officer` when the model's reply can't be parsed, same fallback the
+`show_officer` when the vision model's reply can't be parsed, same fallback the
 `next_step` field already had.
+
+`skin_model` is a second, independent signal: a local, vendored, five-class
+(Acne Vulgaris / Eczema / Fungal Infection / Psoriasis / Normal Skin) ONNX
+classifier -- see `assistant/app/services/skin_classifier.py` and
+`assistant/app/ml/skin_model/NOTICE.md` for its source and scope. It never
+touches the vision LLM's own description or urgency call. It is `null` when
+onnxruntime or the model artifact aren't available, or the photo can't be
+decoded -- the endpoint never 500s because of it. `confidence` is the model's
+own softmax score, not a clinically calibrated probability; the upstream
+project documents real-world accuracy around 70% on its own evaluation set,
+weak on two of its four condition classes. Treat it as experimental, same as
+every other number this field returns -- never invented, never authoritative.
 
 ### `GET /sample-images`
 
@@ -268,3 +292,13 @@ can show "model unavailable" instead of an error.
 <!-- CHECKPOINT id="ckpt_mwfbzanu_ufpcl2" time="2026-11-13T18:49:20.058Z" note="auto" fixes=0 questions=0 highlights=0 sections="" -->
 
 <!-- CHECKPOINT id="ckpt_mwfcp0ll_ky3jbz" time="2026-11-13T19:09:20.073Z" note="auto" fixes=0 questions=0 highlights=0 sections="" -->
+
+<!-- CHECKPOINT id="ckpt_mwfd1vkb_eilgiq" time="2026-11-13T19:19:20.075Z" note="auto" fixes=0 questions=0 highlights=0 sections="" -->
+
+<!-- CHECKPOINT id="ckpt_mwfdeqj9_lwevnh" time="2026-11-13T19:29:20.085Z" note="auto" fixes=0 questions=0 highlights=0 sections="" -->
+
+<!-- CHECKPOINT id="ckpt_mwfdrlhy_u24pvy" time="2026-11-13T19:39:20.086Z" note="auto" fixes=0 questions=0 highlights=0 sections="" -->
+
+<!-- CHECKPOINT id="ckpt_mwfe4ggt_iw949l" time="2026-11-13T19:49:20.093Z" note="auto" fixes=0 questions=0 highlights=0 sections="" -->
+
+<!-- CHECKPOINT id="ckpt_mwfeu6el_bq73ih" time="2026-11-13T20:09:20.109Z" note="auto" fixes=0 questions=0 highlights=0 sections="" -->

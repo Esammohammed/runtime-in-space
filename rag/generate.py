@@ -28,7 +28,7 @@ def build_user_message(chunks: List[Dict[str, Any]], question: str) -> str:
 
 
 def call_ollama(messages: List[Dict[str, str]]) -> str:
-    """Send a chat completion request to Ollama and return the answer."""
+    """Send a chat completion request to a local Ollama server and return the answer."""
     payload = {
         "model": config.OLLAMA_MODEL,
         "messages": messages,
@@ -46,6 +46,31 @@ def call_ollama(messages: List[Dict[str, str]]) -> str:
     return data.get("message", {}).get("content", "")
 
 
+def call_openai(messages: List[Dict[str, str]]) -> str:
+    """Send a chat completion request to the ChatGPT API (or any OpenAI-compatible
+    endpoint) and return the answer."""
+    headers = {"Authorization": f"Bearer {config.OPENAI_API_KEY}"} if config.OPENAI_API_KEY else {}
+    payload = {
+        "model": config.OPENAI_MODEL,
+        "messages": messages,
+        "temperature": config.LLM_TEMPERATURE,
+    }
+    response = requests.post(
+        f"{config.OPENAI_BASE_URL}/chat/completions", json=payload,
+        headers=headers, timeout=config.LLM_TIMEOUT,
+    )
+    response.raise_for_status()
+    return response.json()["choices"][0]["message"]["content"]
+
+
+def call_llm(messages: List[Dict[str, str]]) -> str:
+    """Dispatch to the configured provider. Switching provider is a config change,
+    not a code change -- see RAG_LLM_PROVIDER in config.py."""
+    if config.LLM_PROVIDER == "openai":
+        return call_openai(messages)
+    return call_ollama(messages)
+
+
 def ask(question: str, top_k: int | None = None) -> Dict[str, Any]:
     """End-to-end: retrieve chunks → generate answer → return result dict."""
     if top_k is None:
@@ -59,9 +84,9 @@ def ask(question: str, top_k: int | None = None) -> Dict[str, Any]:
     ]
 
     try:
-        answer = call_ollama(messages)
+        answer = call_llm(messages)
     except Exception as exc:
-        answer = f"Error contacting Ollama: {exc}"
+        answer = f"Error contacting the {config.LLM_PROVIDER} model: {exc}"
 
     return {
         "question": question,

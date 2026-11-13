@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     content_dir: Path = REPO_ROOT / "content"
+    rag_dir: Path = REPO_ROOT / "rag"
 
     # "mock" needs nothing. "openai_compatible" talks to any OpenAI-style
     # endpoint: a hosted API, or a local model served by Ollama.

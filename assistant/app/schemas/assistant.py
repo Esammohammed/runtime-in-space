@@ -33,11 +33,27 @@ class AnalyzeImageIn(BaseModel):
     note: str = ""
 
 
+class SkinClassPrediction(BaseModel):
+    label: str
+    confidence: float
+
+
+class SkinClassification(BaseModel):
+    """Output of the local, vendored skin-condition classifier -- see
+    app/services/skin_classifier.py. Independent of the vision LLM above:
+    real numbers from a real (if experimental) model, never invented."""
+    label: str
+    confidence: float
+    top3: list[SkinClassPrediction]
+    disclaimer: str
+
+
 class AnalyzeImageOut(BaseModel):
     description: str
     next_step: str
     urgency: Urgency
     model: str
+    skin_model: SkinClassification | None = None
 
 
 class ReportIn(BaseModel):

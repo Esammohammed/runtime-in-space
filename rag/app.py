@@ -7,7 +7,7 @@ import streamlit as st
 import requests
 
 import config
-from generate import ask, call_ollama, build_user_message
+from generate import ask, call_llm, build_user_message
 from index import hybrid_search
 
 
@@ -71,11 +71,11 @@ if question:
         ]
         try:
             with st.spinner("Thinking…"):
-                answer = call_ollama(messages)
+                answer = call_llm(messages)
         except requests.exceptions.ConnectionError:
-            answer = "⚠️ Could not reach Ollama. Start Ollama and try again."
+            answer = f"⚠️ Could not reach the {config.LLM_PROVIDER} model. Check it's running and try again."
         except Exception as exc:
-            answer = f"⚠️ Error: {exc}. Start Ollama and try again."
+            answer = f"⚠️ Error: {exc}"
 
         st.write(answer)
 
