@@ -12,6 +12,8 @@ class IndicatorState(BaseModel):
     unit: str
     body_area: str
     source: str
+    hazard: str
+    nasa_risk: str
     value: float | None = None
     timestamp: UtcDateTime | None = None
     status: str | None = None

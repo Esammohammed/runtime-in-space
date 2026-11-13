@@ -16,7 +16,8 @@ Rules:
 IMAGE_SYSTEM = """You look at a photo taken by an astronaut of a skin, wound or eye concern.
 Describe only what is visible. Do not diagnose. Suggest one next step: keep watching,
 show the crew medical officer, or send to flight surgeons. Reply as JSON with the keys
-"description" and "next_step"."""
+"description", "next_step" and "urgency". "urgency" must be exactly one of "watch",
+"show_officer" or "alert_ground", matching the next step you suggested."""
 
 REPORT_SYSTEM = """You write a short status report for flight surgeons on Earth about one crew member.
 Use only the data given. Sections: Summary, Indicators outside normal, Warnings and events,

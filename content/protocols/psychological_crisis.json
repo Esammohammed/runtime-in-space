@@ -1,0 +1,18 @@
+{
+  "id": "psychological_crisis",
+  "title": "Severe psychological distress",
+  "category": "Behavioral health",
+  "reference": "TODO: name the approved source these steps are taken from",
+  "_note": "STRUCTURE ONLY. Every 'text' below is a placeholder. Replace it with the exact wording from the approved source. Do not write medical or counselling steps yourself.",
+  "start": "q1",
+  "nodes": {
+    "q1": { "type": "question", "text": "TODO: is the crew member a danger to themselves or others right now?", "yes": "i1", "no": "q2" },
+    "i1": { "type": "instruction", "text": "TODO: stay with them, remove access to hazards action", "next": "end_escalate" },
+    "q2": { "type": "question", "text": "TODO: are they able to talk about what they're feeling?", "yes": "i2", "no": "i3" },
+    "i2": { "type": "instruction", "text": "TODO: active-listening steps per the approved protocol", "next": "t1" },
+    "t1": { "type": "timer", "text": "TODO: check in again after the interval given by the source", "seconds": 900, "next": "end_monitor" },
+    "i3": { "type": "instruction", "text": "TODO: give space but keep checking in action", "next": "end_escalate" },
+    "end_monitor": { "type": "end", "text": "TODO: closing instruction, keep checking in", "escalate": false },
+    "end_escalate": { "type": "end", "text": "TODO: closing instruction from the source", "escalate": true }
+  }
+}

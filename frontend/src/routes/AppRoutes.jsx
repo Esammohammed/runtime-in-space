@@ -6,6 +6,7 @@ import CrewPage from '@/pages/CrewPage.jsx';
 import EmergencyPage from '@/pages/EmergencyPage.jsx';
 import HomePage from '@/pages/HomePage.jsx';
 import IndicatorPage from '@/pages/IndicatorPage.jsx';
+import PhotoCheckPage from '@/pages/PhotoCheckPage.jsx';
 
 export default function AppRoutes() {
   return (
@@ -15,6 +16,7 @@ export default function AppRoutes() {
         <Route path="/indicator/:indicatorId" element={<IndicatorPage />} />
         <Route path="/check-in" element={<CheckInPage />} />
         <Route path="/assistant" element={<AssistantPage />} />
+        <Route path="/photo-check" element={<PhotoCheckPage />} />
         <Route path="/crew" element={<CrewPage />} />
         <Route path="/emergency" element={<EmergencyPage />} />
       </Route>

@@ -1,16 +1,27 @@
 # Python
 __pycache__/
 *.pyc
+*.pyo
 .venv/
 venv/
+env/
+ENV/
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
 *.db
 
 # Node
 node_modules/
 dist/
+.vite/
+npm-debug.log*
 
 # Env and editors
 .env
+.env.*.local
 .vscode/
 .idea/
+.DS_Store
+Thumbs.db

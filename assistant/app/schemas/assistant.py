@@ -1,8 +1,18 @@
+from typing import Literal
+
 from pydantic import BaseModel
+
+Urgency = Literal["watch", "show_officer", "alert_ground"]
+
+
+class Message(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str
 
 
 class AskIn(BaseModel):
     question: str
+    history: list[Message] = []
     context: dict = {}
 
 
@@ -26,6 +36,7 @@ class AnalyzeImageIn(BaseModel):
 class AnalyzeImageOut(BaseModel):
     description: str
     next_step: str
+    urgency: Urgency
     model: str
 
 

@@ -2,17 +2,20 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Card from '@/components/common/Card.jsx';
 import BodyMap from '@/components/dashboard/BodyMap.jsx';
-import IndicatorCard from '@/components/dashboard/IndicatorCard.jsx';
+import HazardGroups from '@/components/dashboard/HazardGroups.jsx';
 import TaskList from '@/components/dashboard/TaskList.jsx';
 import WarningBanner from '@/components/dashboard/WarningBanner.jsx';
 import { POLL_INTERVAL_MS } from '@/constants/status.js';
 import { useCrew } from '@/context/CrewContext.jsx';
 import usePolling from '@/hooks/usePolling.js';
-import { completeTask, getDashboard } from '@/services/crewService.js';
+import { analyzeCrewMember, completeTask, getDashboard } from '@/services/crewService.js';
 
 export default function HomePage() {
   const { selectedId } = useCrew();
   const [area, setArea] = useState(null);
+  const [analysis, setAnalysis] = useState(null);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [analyzeError, setAnalyzeError] = useState(null);
   const { data, error, refresh } = usePolling(
     () => (selectedId ? getDashboard(selectedId) : Promise.resolve(null)),
     POLL_INTERVAL_MS,
@@ -27,24 +30,56 @@ export default function HomePage() {
     await completeTask(taskId);
     refresh();
   };
+  const onAnalyze = async () => {
+    setAnalyzing(true);
+    setAnalyzeError(null);
+    try {
+      setAnalysis(await analyzeCrewMember(selectedId));
+      refresh();
+    } catch (actionError) {
+      setAnalyzeError(actionError);
+    } finally {
+      setAnalyzing(false);
+    }
+  };
 
   return (
     <>
       <WarningBanner warnings={data.warnings} />
       <div className="home-grid">
-        <section className="indicator-grid" aria-label="Health indicators">
-          {indicators.map((indicator) => <IndicatorCard key={indicator.id} indicator={indicator} />)}
-        </section>
-        <BodyMap areas={data.body_areas} selected={area} onSelect={setArea} />
+        <HazardGroups indicators={indicators} />
         <aside className="side">
+          <BodyMap areas={data.body_areas} selected={area} onSelect={setArea} />
           <TaskList tasks={data.tasks} onComplete={onComplete} />
           <Card title={`${data.streak}-day streak`}>
             <p className="muted">Consecutive days with a completed check-in.</p>
             <Link to="/check-in" className="button">Do today's check-in</Link>
           </Card>
           <Card title="Ask the assistant" aside="On board">
-            <p className="muted">Describe a symptom or send a photo. Answers cite their sources.</p>
-            <Link to="/assistant" className="button ghost">Open the assistant</Link>
+            <p className="muted">Chat about a symptom, or analyze a photo separately. Answers cite their sources.</p>
+            <div className="row wrap">
+              <Link to="/assistant" className="button ghost">Open chat</Link>
+              <Link to="/photo-check" className="button ghost">Analyze a photo</Link>
+            </div>
+          </Card>
+          <Card title="Anomaly check" aside="On demand">
+            <p className="muted">Looks for unusual patterns across recent readings.</p>
+            <button type="button" className="button ghost" onClick={onAnalyze} disabled={analyzing}>
+              {analyzing ? 'Checking…' : 'Run analysis'}
+            </button>
+            {analyzeError && <p className="error">{analyzeError.message}</p>}
+            {analysis && !analysis.model && (
+              <p className="muted small">Model unavailable right now.</p>
+            )}
+            {analysis && analysis.model && (
+              <ul className="small">
+                {analysis.results.map((item) => (
+                  <li key={item.indicator}>
+                    {item.indicator}: {item.is_anomaly ? 'unusual' : 'normal'} (score {item.score.toFixed(1)})
+                  </li>
+                ))}
+              </ul>
+            )}
           </Card>
         </aside>
       </div>

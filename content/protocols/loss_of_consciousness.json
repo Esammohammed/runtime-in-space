@@ -1,0 +1,17 @@
+{
+  "id": "loss_of_consciousness",
+  "title": "Unresponsive crew member",
+  "category": "Neurological",
+  "reference": "TODO: name the approved source these steps are taken from",
+  "_note": "STRUCTURE ONLY. Every 'text' below is a placeholder. Replace it with the exact wording from the approved source. Do not write medical steps yourself.",
+  "start": "q1",
+  "nodes": {
+    "q1": { "type": "question", "text": "TODO: are they breathing normally?", "yes": "q2", "no": "i3" },
+    "q2": { "type": "question", "text": "TODO: do they respond to voice or touch?", "yes": "end_monitor", "no": "i1" },
+    "i1": { "type": "instruction", "text": "TODO: recovery position action for unresponsive-but-breathing", "next": "t1" },
+    "t1": { "type": "timer", "text": "TODO: reassess breathing and response at the interval given by the source", "seconds": 120, "next": "end_escalate" },
+    "i3": { "type": "instruction", "text": "TODO: begin resuscitation steps per the approved protocol", "next": "end_escalate" },
+    "end_monitor": { "type": "end", "text": "TODO: closing instruction for a drowsy but responsive crew member", "escalate": false },
+    "end_escalate": { "type": "end", "text": "TODO: closing instruction from the source", "escalate": true }
+  }
+}

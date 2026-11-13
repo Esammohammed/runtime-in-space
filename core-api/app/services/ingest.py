@@ -36,7 +36,7 @@ def store_reading(db: Session, payload: ReadingIn) -> IngestOut:
 
     every = get_settings().early_warning_every
     for item in results:
-        if every and definitions[item.indicator]["source"] == "band":
+        if every and definitions[item.indicator]["source"] == "continuous":
             count = db.query(Reading).filter_by(crew_id=crew.id, indicator=item.indicator).count()
             if count % every == 0:
                 early_warning.run(db, crew, item.indicator)

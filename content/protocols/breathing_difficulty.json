@@ -1,0 +1,18 @@
+{
+  "id": "breathing_difficulty",
+  "title": "Difficulty breathing",
+  "category": "Respiratory",
+  "reference": "TODO: name the approved source these steps are taken from",
+  "_note": "STRUCTURE ONLY. Every 'text' below is a placeholder. Replace it with the exact wording from the approved source. Do not write medical steps yourself.",
+  "start": "q1",
+  "nodes": {
+    "q1": { "type": "question", "text": "TODO: can they speak in full sentences?", "yes": "q2", "no": "i3" },
+    "q2": { "type": "question", "text": "TODO: is the blood oxygen or cabin CO2 reading outside the normal range?", "yes": "i1", "no": "i2" },
+    "i1": { "type": "instruction", "text": "TODO: action for an abnormal reading (mask, ventilation check)", "next": "t1" },
+    "i2": { "type": "instruction", "text": "TODO: reassurance and positioning action", "next": "end_monitor" },
+    "i3": { "type": "instruction", "text": "TODO: immediate action for severe distress", "next": "end_escalate" },
+    "t1": { "type": "timer", "text": "TODO: timed reassessment after the action", "seconds": 120, "next": "end_escalate" },
+    "end_monitor": { "type": "end", "text": "TODO: closing instruction, keep observing", "escalate": false },
+    "end_escalate": { "type": "end", "text": "TODO: closing instruction from the source", "escalate": true }
+  }
+}

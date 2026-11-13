@@ -1,0 +1,18 @@
+{
+  "id": "radiation_exposure",
+  "title": "Radiation exposure or solar event",
+  "category": "Environmental",
+  "reference": "TODO: name the approved source these steps are taken from",
+  "_note": "STRUCTURE ONLY. Every 'text' below is a placeholder. Replace it with the exact wording from the approved source. Do not write medical steps yourself.",
+  "start": "q1",
+  "nodes": {
+    "q1": { "type": "question", "text": "TODO: is a solar particle event alert active, or is the radiation dose reading spiking?", "yes": "i1", "no": "i4" },
+    "i1": { "type": "instruction", "text": "TODO: move to the shielded module or storm shelter now", "next": "q2" },
+    "q2": { "type": "question", "text": "TODO: any symptoms -- nausea, skin redness, fatigue?", "yes": "i2", "no": "t1" },
+    "i2": { "type": "instruction", "text": "TODO: isolate and monitor action for symptomatic exposure", "next": "end_escalate" },
+    "t1": { "type": "timer", "text": "TODO: stay sheltered for the duration given by the source", "seconds": 300, "next": "end_monitor" },
+    "i4": { "type": "instruction", "text": "TODO: confirm the dosimeter reading and log it", "next": "end_monitor" },
+    "end_monitor": { "type": "end", "text": "TODO: closing instruction, keep observing the dose reading", "escalate": false },
+    "end_escalate": { "type": "end", "text": "TODO: closing instruction from the source", "escalate": true }
+  }
+}

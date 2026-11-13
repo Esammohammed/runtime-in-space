@@ -1,9 +1,17 @@
+from typing import Literal
+
 from pydantic import BaseModel
+
+
+class Message(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str
 
 
 class AskIn(BaseModel):
     crew_id: int
     question: str
+    history: list[Message] = []
 
 
 class AnalyzeImageIn(BaseModel):

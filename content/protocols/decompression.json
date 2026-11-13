@@ -1,0 +1,18 @@
+{
+  "id": "decompression",
+  "title": "Pressure loss or hull breach",
+  "category": "Environmental",
+  "reference": "TODO: name the approved source these steps are taken from",
+  "_note": "STRUCTURE ONLY. Every 'text' below is a placeholder. Replace it with the exact wording from the approved source. Do not write medical steps yourself.",
+  "start": "q1",
+  "nodes": {
+    "q1": { "type": "question", "text": "TODO: is a pressure or hull alarm active?", "yes": "i1", "no": "i4" },
+    "i1": { "type": "instruction", "text": "TODO: don emergency breathing apparatus immediately", "next": "q2" },
+    "q2": { "type": "question", "text": "TODO: is the leak location identified?", "yes": "i2", "no": "i3" },
+    "i2": { "type": "instruction", "text": "TODO: seal or patch action, then move to a safe module", "next": "end_escalate" },
+    "i3": { "type": "instruction", "text": "TODO: evacuate to the safe module and seal the hatch action", "next": "end_escalate" },
+    "i4": { "type": "instruction", "text": "TODO: confirm the cabin pressure reading is nominal", "next": "end_monitor" },
+    "end_monitor": { "type": "end", "text": "TODO: closing instruction, keep monitoring cabin pressure", "escalate": false },
+    "end_escalate": { "type": "end", "text": "TODO: closing instruction from the source", "escalate": true }
+  }
+}

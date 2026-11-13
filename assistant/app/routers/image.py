@@ -1,12 +1,35 @@
 import json
 
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import FileResponse
 
+from app.core.config import get_settings
 from app.schemas.assistant import AnalyzeImageIn, AnalyzeImageOut
 from app.services import prompts
 from app.services.llm import LLMError, get_llm
 
 router = APIRouter(tags=["image"])
+
+VALID_URGENCY = {"watch", "show_officer", "alert_ground"}
+IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png"}
+
+
+@router.get("/sample-images")
+def list_sample_images() -> list[str]:
+    """Filenames of whatever demo photos have been dropped in content/sample-images."""
+    folder = get_settings().content_dir / "sample-images"
+    if not folder.exists():
+        return []
+    return sorted(p.name for p in folder.iterdir() if p.suffix.lower() in IMAGE_EXTENSIONS)
+
+
+@router.get("/sample-images/{name}")
+def get_sample_image(name: str):
+    folder = (get_settings().content_dir / "sample-images").resolve()
+    path = (folder / name).resolve()
+    if path.parent != folder or not path.is_file() or path.suffix.lower() not in IMAGE_EXTENSIONS:
+        raise HTTPException(status_code=404, detail="Sample image not found")
+    return FileResponse(path)
 
 
 @router.post("/analyze-image", response_model=AnalyzeImageOut)
@@ -21,6 +44,9 @@ def analyze_image(request: AnalyzeImageIn):
     try:
         parsed = json.loads(raw.strip().removeprefix("```json").removesuffix("```").strip())
         description, next_step = parsed["description"], parsed["next_step"]
+        urgency = parsed.get("urgency")
+        if urgency not in VALID_URGENCY:
+            urgency = "show_officer"
     except (json.JSONDecodeError, KeyError, TypeError):
-        description, next_step = raw, "Show this to the crew medical officer."
-    return AnalyzeImageOut(description=description, next_step=next_step, model=llm.name)
+        description, next_step, urgency = raw, "Show this to the crew medical officer.", "show_officer"
+    return AnalyzeImageOut(description=description, next_step=next_step, urgency=urgency, model=llm.name)

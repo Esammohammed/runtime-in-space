@@ -1,0 +1,19 @@
+{
+  "id": "severe_bleeding",
+  "title": "Severe bleeding",
+  "category": "Trauma and injury",
+  "reference": "TODO: name the approved source these steps are taken from",
+  "_note": "STRUCTURE ONLY. Every 'text' below is a placeholder. Replace it with the exact wording from the approved source. Do not write medical steps yourself.",
+  "start": "q1",
+  "nodes": {
+    "q1": { "type": "question", "text": "TODO: is the bleeding spurting or soaking through a dressing quickly?", "yes": "i1", "no": "i4" },
+    "i1": { "type": "instruction", "text": "TODO: apply direct pressure (or tourniquet, per source) action", "next": "t1" },
+    "t1": { "type": "timer", "text": "TODO: hold pressure for the time given by the source", "seconds": 180, "next": "q2" },
+    "q2": { "type": "question", "text": "TODO: has the bleeding slowed or stopped?", "yes": "i2", "no": "i3" },
+    "i2": { "type": "instruction", "text": "TODO: dress the wound and continue monitoring action", "next": "end_escalate" },
+    "i3": { "type": "instruction", "text": "TODO: escalate to a more aggressive control measure per source", "next": "end_escalate" },
+    "i4": { "type": "instruction", "text": "TODO: clean and dress a minor wound action", "next": "end_monitor" },
+    "end_monitor": { "type": "end", "text": "TODO: closing instruction, keep observing the wound", "escalate": false },
+    "end_escalate": { "type": "end", "text": "TODO: closing instruction from the source", "escalate": true }
+  }
+}

@@ -20,6 +20,13 @@ def test_dashboard_reflects_latest_reading(client):
     assert dashboard["body_areas"]["heart"] == "red"
 
 
+def test_dashboard_includes_hazard_and_nasa_risk(client):
+    dashboard = client.get("/crew/1/dashboard").json()
+    heart = next(i for i in dashboard["indicators"] if i["id"] == "heart_rate")
+    assert heart["hazard"] == "gravity"
+    assert heart["nasa_risk"]
+
+
 def test_manual_reading_closes_its_task_and_starts_a_streak(client):
     before = client.get("/crew/2/tasks").json()
     assert any(t["indicator"] == "blood_glucose" and not t["done"] for t in before)
@@ -40,3 +47,13 @@ def test_bulk_history_and_series(client):
     series = client.get("/crew/3/readings", params={"indicator": "heart_rate"}).json()
     assert [p["value"] for p in series] == [60, 61, 62, 63, 64]
     assert series[0]["timestamp"].endswith("Z")
+
+
+def test_add_crew_member_needs_only_a_name(client):
+    response = client.post("/crew", json={"name": "Crew 5"})
+    assert response.status_code == 200
+    member = response.json()
+    assert member["name"] == "Crew 5"
+    assert member["role"] == ""
+    assert member["baselines"] == {}
+    assert any(c["id"] == member["id"] for c in client.get("/crew").json())

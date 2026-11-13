@@ -1,0 +1,16 @@
+{
+  "id": "stroke_like_symptoms",
+  "title": "Stroke-like symptoms",
+  "category": "Neurological",
+  "reference": "TODO: name the approved source these steps are taken from (e.g. a F.A.S.T.-style check)",
+  "_note": "STRUCTURE ONLY. Every 'text' below is a placeholder. Replace it with the exact wording from the approved source. Do not write medical steps yourself.",
+  "start": "q1",
+  "nodes": {
+    "q1": { "type": "question", "text": "TODO: is one side of the face drooping?", "yes": "i1", "no": "q2" },
+    "q2": { "type": "question", "text": "TODO: is there arm weakness or numbness on one side?", "yes": "i1", "no": "q3" },
+    "q3": { "type": "question", "text": "TODO: is speech slurred or strange?", "yes": "i1", "no": "end_monitor" },
+    "i1": { "type": "instruction", "text": "TODO: note the time symptoms started, this detail matters for treatment", "next": "end_escalate" },
+    "end_monitor": { "type": "end", "text": "TODO: closing instruction, no signs now, keep observing", "escalate": false },
+    "end_escalate": { "type": "end", "text": "TODO: closing instruction from the source", "escalate": true }
+  }
+}

@@ -2,12 +2,12 @@
   "_note": "Placeholder crew. Baselines are each person's own normal value and drive the simulator and the baseline check.",
   "crew": [
     { "id": 1, "name": "Crew 1", "role": "Commander", "age": 41,
-      "baselines": { "heart_rate": 62, "hrv": 68, "spo2": 98, "skin_temp": 36.5, "sleep_hours": 7.6, "bp_systolic": 114, "bp_diastolic": 73, "blood_glucose": 88, "mood": 4 } },
+      "baselines": { "heart_rate": 62, "hrv": 68, "spo2": 98, "skin_temp": 36.5, "sleep_hours": 7.6, "bp_systolic": 114, "bp_diastolic": 73, "blood_glucose": 88, "mood": 4, "radiation_dose": 0.3, "cabin_co2": 1.5 } },
     { "id": 2, "name": "Crew 2", "role": "Pilot", "age": 37,
-      "baselines": { "heart_rate": 68, "hrv": 58, "spo2": 98, "skin_temp": 36.6, "sleep_hours": 7.2, "bp_systolic": 118, "bp_diastolic": 76, "blood_glucose": 91, "mood": 4 } },
+      "baselines": { "heart_rate": 68, "hrv": 58, "spo2": 98, "skin_temp": 36.6, "sleep_hours": 7.2, "bp_systolic": 118, "bp_diastolic": 76, "blood_glucose": 91, "mood": 4, "radiation_dose": 0.3, "cabin_co2": 1.5 } },
     { "id": 3, "name": "Crew 3", "role": "Medical officer", "age": 44,
-      "baselines": { "heart_rate": 71, "hrv": 52, "spo2": 97, "skin_temp": 36.7, "sleep_hours": 7.0, "bp_systolic": 116, "bp_diastolic": 75, "blood_glucose": 93, "mood": 4 } },
+      "baselines": { "heart_rate": 71, "hrv": 52, "spo2": 97, "skin_temp": 36.7, "sleep_hours": 7.0, "bp_systolic": 116, "bp_diastolic": 75, "blood_glucose": 93, "mood": 4, "radiation_dose": 0.3, "cabin_co2": 1.5 } },
     { "id": 4, "name": "Crew 4", "role": "Mission specialist", "age": 33,
-      "baselines": { "heart_rate": 65, "hrv": 72, "spo2": 98, "skin_temp": 36.4, "sleep_hours": 7.8, "bp_systolic": 110, "bp_diastolic": 70, "blood_glucose": 86, "mood": 4 } }
+      "baselines": { "heart_rate": 65, "hrv": 72, "spo2": 98, "skin_temp": 36.4, "sleep_hours": 7.8, "bp_systolic": 110, "bp_diastolic": 70, "blood_glucose": 86, "mood": 4, "radiation_dose": 0.3, "cabin_co2": 1.5 } }
   ]
 }

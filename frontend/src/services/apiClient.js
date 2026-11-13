@@ -18,4 +18,9 @@ async function request(path, options = {}) {
 export const api = {
   get: (path) => request(path),
   post: (path, body) => request(path, { method: 'POST', body: body ? JSON.stringify(body) : undefined }),
+  getBlob: async (path) => {
+    const response = await fetch(`${BASE_URL}${path}`);
+    if (!response.ok) throw new Error(`Request failed (${response.status})`);
+    return response.blob();
+  },
 };

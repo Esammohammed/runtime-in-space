@@ -1,0 +1,18 @@
+{
+  "id": "eye_injury",
+  "title": "Eye injury or chemical exposure",
+  "category": "Trauma and injury",
+  "reference": "TODO: name the approved source these steps are taken from",
+  "_note": "STRUCTURE ONLY. Every 'text' below is a placeholder. Replace it with the exact wording from the approved source. Do not write medical steps yourself.",
+  "start": "q1",
+  "nodes": {
+    "q1": { "type": "question", "text": "TODO: was there a chemical splash in the eye?", "yes": "i1", "no": "q2" },
+    "i1": { "type": "instruction", "text": "TODO: flush the eye continuously action", "next": "t1" },
+    "t1": { "type": "timer", "text": "TODO: flush for the time given by the source", "seconds": 900, "next": "end_escalate" },
+    "q2": { "type": "question", "text": "TODO: is there a foreign object or penetrating injury visible?", "yes": "i2", "no": "i3" },
+    "i2": { "type": "instruction", "text": "TODO: do not remove the object, shield the eye action", "next": "end_escalate" },
+    "i3": { "type": "instruction", "text": "TODO: minor-irritation care action", "next": "end_monitor" },
+    "end_monitor": { "type": "end", "text": "TODO: closing instruction for minor irritation", "escalate": false },
+    "end_escalate": { "type": "end", "text": "TODO: closing instruction from the source", "escalate": true }
+  }
+}

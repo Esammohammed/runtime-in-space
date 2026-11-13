@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
  * Walks one protocol, one node per screen. The steps come from the protocol
  * file and are shown exactly as written. Nothing here generates text.
  */
-export default function ProtocolRunner({ protocol, onStep, onExit }) {
+export default function ProtocolRunner({ protocol, onStep, onExit, onGenerateReport, reportStatus }) {
   const [nodeId, setNodeId] = useState(protocol.start);
   const [secondsLeft, setSecondsLeft] = useState(null);
   const node = protocol.nodes[nodeId];
@@ -47,7 +47,21 @@ export default function ProtocolRunner({ protocol, onStep, onExit }) {
       {node.type === 'end' && (
         <>
           {node.escalate && <p className="status status-red">▲ Alert the crew medical officer and report to Earth.</p>}
-          <button type="button" className="button big" onClick={onExit}>Close protocol</button>
+          <div className="protocol-actions">
+            <button type="button" className="button big" onClick={onExit}>Close protocol</button>
+            {onGenerateReport && (
+              <button type="button" className="button big ghost" onClick={onGenerateReport} disabled={reportStatus?.busy}>
+                {reportStatus?.busy ? 'Writing report…' : 'Generate report for Earth'}
+              </button>
+            )}
+          </div>
+          {reportStatus?.error && <p className="error">{reportStatus.error.message}</p>}
+          {reportStatus?.report && (
+            <div className="report">
+              <p className="muted small">Saved to the Crew page · state: {reportStatus.report.state}</p>
+              <p className="prewrap">{reportStatus.report.text}</p>
+            </div>
+          )}
         </>
       )}
     </div>

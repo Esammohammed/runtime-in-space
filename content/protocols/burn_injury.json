@@ -1,0 +1,16 @@
+{
+  "id": "burn_injury",
+  "title": "Burn injury",
+  "category": "Trauma and injury",
+  "reference": "TODO: name the approved source these steps are taken from",
+  "_note": "STRUCTURE ONLY. Every 'text' below is a placeholder. Replace it with the exact wording from the approved source. Do not write medical steps yourself.",
+  "start": "q1",
+  "nodes": {
+    "q1": { "type": "question", "text": "TODO: is the burn large, deep, or on the face/hands/airway?", "yes": "i1", "no": "i2" },
+    "i1": { "type": "instruction", "text": "TODO: remove from the heat source, cover (do not use ice) action", "next": "t1" },
+    "t1": { "type": "timer", "text": "TODO: cool under running water for the time given by the source", "seconds": 600, "next": "end_escalate" },
+    "i2": { "type": "instruction", "text": "TODO: cool and dress a minor burn action", "next": "end_monitor" },
+    "end_monitor": { "type": "end", "text": "TODO: closing instruction for a minor burn", "escalate": false },
+    "end_escalate": { "type": "end", "text": "TODO: closing instruction from the source", "escalate": true }
+  }
+}

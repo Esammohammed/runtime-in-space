@@ -4,6 +4,13 @@ from app.schemas.common import UtcDateTime
 from pydantic import BaseModel, ConfigDict
 
 
+class CrewIn(BaseModel):
+    """Adding a crew member needs only a name -- no credentials, no email."""
+
+    name: str
+    role: str = ""
+
+
 class CrewOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

@@ -20,7 +20,8 @@ def indicator_states(db: Session, crew: Crew) -> list[IndicatorState]:
         rows = (db.query(Reading).filter_by(crew_id=crew.id, indicator=definition["id"])
                 .order_by(Reading.timestamp.desc()).limit(TREND_POINTS).all())
         state = IndicatorState(id=definition["id"], name=definition["name"], unit=definition["unit"],
-                               body_area=definition["body_area"], source=definition["source"])
+                               body_area=definition["body_area"], source=definition["source"],
+                               hazard=definition["hazard"], nasa_risk=definition["nasa_risk"])
         if rows:
             latest = rows[0]
             stored = db.query(Assessment).filter_by(reading_id=latest.id).first()

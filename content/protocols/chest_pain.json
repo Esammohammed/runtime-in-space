@@ -1,6 +1,7 @@
 {
   "id": "chest_pain",
   "title": "Chest pain",
+  "category": "Cardiac and circulatory",
   "reference": "TODO: name the approved source these steps are taken from",
   "_note": "STRUCTURE ONLY. Every 'text' below is a placeholder. Replace it with the exact wording from the approved source. Do not write medical steps yourself.",
   "start": "q1",

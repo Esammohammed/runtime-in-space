@@ -9,6 +9,14 @@ export const UNKNOWN_STATUS = { label: 'No data', symbol: '○', className: 'sta
 
 export const statusOf = (status) => STATUS[status] ?? UNKNOWN_STATUS;
 
+const ORDER = { green: 0, yellow: 1, red: 2 };
+
+// The most serious status in a list, or null for an empty/all-unknown list.
+export const worstStatus = (statuses) => {
+  const known = statuses.filter((status) => status in ORDER);
+  return known.length ? known.reduce((worst, status) => (ORDER[status] > ORDER[worst] ? status : worst)) : null;
+};
+
 export const BODY_AREAS = {
   head: 'Head and mind',
   heart: 'Heart and vessels',

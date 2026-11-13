@@ -1,0 +1,19 @@
+{
+  "id": "allergic_reaction",
+  "title": "Allergic reaction",
+  "category": "Immune and allergic",
+  "reference": "TODO: name the approved source these steps are taken from",
+  "_note": "STRUCTURE ONLY. Every 'text' below is a placeholder. Replace it with the exact wording from the approved source. Do not write medical steps yourself.",
+  "start": "q1",
+  "nodes": {
+    "q1": { "type": "question", "text": "TODO: any difficulty breathing, facial/throat swelling, or widespread hives?", "yes": "i1", "no": "i4" },
+    "i1": { "type": "instruction", "text": "TODO: administer the emergency medication per the kit's instructions", "next": "t1" },
+    "t1": { "type": "timer", "text": "TODO: monitor for the time given by the source", "seconds": 300, "next": "q2" },
+    "q2": { "type": "question", "text": "TODO: are symptoms improving?", "yes": "i2", "no": "i3" },
+    "i2": { "type": "instruction", "text": "TODO: continue monitoring action", "next": "end_escalate" },
+    "i3": { "type": "instruction", "text": "TODO: second dose or further escalation action per source", "next": "end_escalate" },
+    "i4": { "type": "instruction", "text": "TODO: mild-reaction monitoring action", "next": "end_monitor" },
+    "end_monitor": { "type": "end", "text": "TODO: closing instruction for a mild reaction", "escalate": false },
+    "end_escalate": { "type": "end", "text": "TODO: closing instruction from the source", "escalate": true }
+  }
+}
