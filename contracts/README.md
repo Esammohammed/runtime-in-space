@@ -190,6 +190,22 @@ project documents real-world accuracy around 70% on its own evaluation set,
 weak on two of its four condition classes. Treat it as experimental, same as
 every other number this field returns -- never invented, never authoritative.
 
+### `POST /analyze-image/report`
+
+```json
+{ "image_base64": "<base64>", "mime_type": "image/jpeg", "note": "rash on forearm",
+  "crew_name": "Crew 1",
+  "analysis": { "description": "...", "next_step": "...", "urgency": "show_officer",
+                "model": "mock", "skin_model": { "...": "the /analyze-image response, as-is" } } }
+```
+
+Response: the PDF bytes (`application/pdf`, `Content-Disposition: attachment`).
+
+A one-page PDF of an analysis the caller already has: the photo, the crew
+member's note, the vision model's finding and urgency, and the skin model's
+top-3 bars with its disclaimer. Presentation only -- it never re-runs the
+vision LLM or the skin classifier and never changes a value it's given.
+
 ### `GET /sample-images`
 
 Returns `["forearm_rash.jpg", ...]` -- filenames of whatever demo photos
@@ -223,6 +239,7 @@ Response: `{ "report": "...", "model": "mock" }`
 | `POST /events` | Log an emergency step |
 | `POST /assistant/ask` | `{ "crew_id": 1, "question": "...", "history": [{"role": "user", "content": "..."}, {"role": "assistant", "content": "..."}] }` |
 | `POST /assistant/analyze-image` | `{ "crew_id": 1, "image_base64": "...", "mime_type": "...", "note": "..." }` |
+| `POST /assistant/analyze-image/report` | Same body plus `"analysis": <the /analyze-image response>`; returns the PDF. Core fills in `crew_name` from the database before forwarding. |
 | `GET /assistant/sample-images` | Filenames for the "try a sample" picker |
 | `GET /assistant/sample-images/{name}` | One sample photo's bytes |
 | `POST /crew/{id}/reports` | Generate a report for Earth |
@@ -302,3 +319,11 @@ can show "model unavailable" instead of an error.
 <!-- CHECKPOINT id="ckpt_mwfe4ggt_iw949l" time="2026-11-13T19:49:20.093Z" note="auto" fixes=0 questions=0 highlights=0 sections="" -->
 
 <!-- CHECKPOINT id="ckpt_mwfeu6el_bq73ih" time="2026-11-13T20:09:20.109Z" note="auto" fixes=0 questions=0 highlights=0 sections="" -->
+
+<!-- CHECKPOINT id="ckpt_mwff71dl_ni1d5f" time="2026-11-13T20:19:20.121Z" note="auto" fixes=0 questions=0 highlights=0 sections="" -->
+
+<!-- CHECKPOINT id="ckpt_mwffjwcf_zcpe1c" time="2026-11-13T20:29:20.127Z" note="auto" fixes=0 questions=0 highlights=0 sections="" -->
+
+<!-- CHECKPOINT id="ckpt_mwffwrb7_843y6x" time="2026-11-13T20:39:20.131Z" note="auto" fixes=0 questions=0 highlights=0 sections="" -->
+
+<!-- CHECKPOINT id="ckpt_mwfg9ma4_jxmoat" time="2026-11-13T20:49:20.140Z" note="auto" fixes=0 questions=0 highlights=0 sections="" -->

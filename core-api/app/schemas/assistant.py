@@ -19,3 +19,11 @@ class AnalyzeImageIn(BaseModel):
     image_base64: str
     mime_type: str = "image/jpeg"
     note: str = ""
+
+
+class PhotoReportIn(BaseModel):
+    crew_id: int
+    image_base64: str
+    mime_type: str = "image/jpeg"
+    note: str = ""
+    analysis: dict

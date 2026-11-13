@@ -95,6 +95,36 @@ def test_skin_classifier_classifies_a_real_photo():
     assert len(result.top3) == 3
 
 
+def test_photo_report_is_a_pdf_and_does_not_rerun_the_models(monkeypatch):
+    from app.routers import image as image_router
+
+    monkeypatch.setattr(image_router, "get_llm", lambda: (_ for _ in ()).throw(AssertionError("LLM called")))
+    monkeypatch.setattr(image_router.skin_classifier, "classify",
+                        lambda _: (_ for _ in ()).throw(AssertionError("classifier called")))
+    analysis = {"description": "A red patch on the forearm.", "next_step": "Show the officer.",
+                "urgency": "show_officer", "model": "mock",
+                "skin_model": {"label": "Eczema", "confidence": 0.7, "disclaimer": "Experimental.",
+                               "top3": [{"label": "Eczema", "confidence": 0.7},
+                                        {"label": "Normal Skin", "confidence": 0.2},
+                                        {"label": "Acne Vulgaris", "confidence": 0.1}]}}
+    response = client.post("/analyze-image/report", json={"image_base64": "AAAA", "note": "itchy",
+                                                          "crew_name": "Crew 1", "analysis": analysis})
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/pdf"
+    assert response.content.startswith(b"%PDF")
+
+
+def test_load_chunks_skips_the_source_attribution_line():
+    """Each nasa-docs file opens with a 'Source: NASA ...' citation line --
+    words like 'NASA'/'Health'/'Countermeasures' in it coincidentally match
+    a lot of questions, so it must not become a scoreable chunk that crowds
+    out the file's actual content paragraphs."""
+    chunks = rag.load_chunks()
+    assert chunks, "content/nasa-docs/ should have real files to load in this repo"
+    assert not any(c["snippet"].startswith("Source:") for c in chunks)
+    assert not any(c["snippet"].startswith("#") for c in chunks)
+
+
 def test_search_ranks_by_shared_words(monkeypatch):
     chunks = [{"title": "a.md", "snippet": "Bone loss in microgravity", "words": {"bone", "loss", "microgravity"}},
               {"title": "b.md", "snippet": "Radiation exposure limits", "words": {"radiation", "exposure", "limits"}}]

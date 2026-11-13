@@ -23,4 +23,16 @@ export const api = {
     if (!response.ok) throw new Error(`Request failed (${response.status})`);
     return response.blob();
   },
+  postBlob: async (path, body) => {
+    const response = await fetch(`${BASE_URL}${path}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!response.ok) {
+      const detail = await response.json().catch(() => ({}));
+      throw new Error(detail.detail ?? `Request failed (${response.status})`);
+    }
+    return response.blob();
+  },
 };

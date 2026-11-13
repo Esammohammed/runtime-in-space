@@ -56,6 +56,16 @@ class AnalyzeImageOut(BaseModel):
     skin_model: SkinClassification | None = None
 
 
+class PhotoReportIn(BaseModel):
+    """Builds a PDF for an analysis the caller already has -- never re-runs the
+    vision LLM or the skin classifier, just lays the given result out on a page."""
+    image_base64: str
+    mime_type: str = "image/jpeg"
+    note: str = ""
+    crew_name: str = ""
+    analysis: AnalyzeImageOut
+
+
 class ReportIn(BaseModel):
     context: dict
     days: int = 7

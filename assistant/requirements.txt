@@ -11,6 +11,9 @@ onnxruntime>=1.18
 numpy>=1.26
 Pillow>=10.3
 
+# PDF report for a photo-check result (app/services/photo_report.py).
+reportlab>=4.0
+
 # Only for the real hybrid RAG engine in ../rag (BM25 + embeddings over the
 # indexed PDFs). Large download; install when you've built the index with
 # `python rag/main.py ingest`. Without these, retrieval falls back to the

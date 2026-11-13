@@ -2,11 +2,11 @@ import base64
 import json
 
 from fastapi import APIRouter, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 
 from app.core.config import get_settings
-from app.schemas.assistant import AnalyzeImageIn, AnalyzeImageOut
-from app.services import prompts, skin_classifier
+from app.schemas.assistant import AnalyzeImageIn, AnalyzeImageOut, PhotoReportIn
+from app.services import photo_report, prompts, skin_classifier
 from app.services.llm import LLMError, get_llm
 
 router = APIRouter(tags=["image"])
@@ -56,3 +56,16 @@ def analyze_image(request: AnalyzeImageIn):
         skin_model = None
     return AnalyzeImageOut(description=description, next_step=next_step, urgency=urgency, model=llm.name,
                             skin_model=skin_model)
+
+
+@router.post("/analyze-image/report")
+def analyze_image_report(request: PhotoReportIn):
+    """PDF version of an analysis the caller already has -- does not call the
+    LLM or the skin classifier again, just lays the given result out on a page."""
+    try:
+        image_bytes = base64.b64decode(request.image_base64)
+    except Exception:
+        image_bytes = None
+    pdf_bytes = photo_report.build_pdf(request.analysis, request.note, image_bytes, request.crew_name)
+    return Response(content=pdf_bytes, media_type="application/pdf",
+                     headers={"Content-Disposition": "attachment; filename=photo-check-report.pdf"})

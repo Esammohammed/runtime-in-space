@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     llm_model: str = "gpt-4o-mini"
     llm_timeout_seconds: float = 80.0
 
-    rag_top_k: int = 3
+    rag_top_k: int = 5
 
 
 @lru_cache

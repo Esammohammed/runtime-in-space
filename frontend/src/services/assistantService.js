@@ -14,6 +14,10 @@ export const analyzeImage = (crewId, imageBase64, mimeType, note) =>
     ? Promise.resolve({ description: '[mock] Photo analysis appears here.', next_step: 'Connect the backend.', urgency: 'watch', model: 'mock', skin_model: null })
     : api.post('/assistant/analyze-image', { crew_id: crewId, image_base64: imageBase64, mime_type: mimeType, note });
 
+/** PDF of an analysis already returned by analyzeImage -- nothing is re-run. */
+export const downloadPhotoReport = (crewId, imageBase64, mimeType, note, analysis) =>
+  api.postBlob('/assistant/analyze-image/report', { crew_id: crewId, image_base64: imageBase64, mime_type: mimeType, note, analysis });
+
 export const listSampleImages = () =>
   USE_MOCK ? Promise.resolve([]) : api.get('/assistant/sample-images');
 

@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.db.database import get_db
 from app.db.models import Crew
-from app.schemas.assistant import AnalyzeImageIn, AskIn
+from app.schemas.assistant import AnalyzeImageIn, AskIn, PhotoReportIn
 from app.services import assistant_client
 from app.services.dashboard import build_context
 
@@ -37,6 +37,19 @@ def ask(payload: AskIn, db: Session = Depends(get_db)):
 def analyze_image(payload: AnalyzeImageIn, db: Session = Depends(get_db)):
     _crew_or_404(db, payload.crew_id)
     return _call("/analyze-image", payload.model_dump(exclude={"crew_id"}))
+
+
+@router.post("/analyze-image/report")
+def analyze_image_report(payload: PhotoReportIn, db: Session = Depends(get_db)):
+    """PDF version of an analysis the caller already has from /analyze-image above."""
+    crew = _crew_or_404(db, payload.crew_id)
+    body = {**payload.model_dump(exclude={"crew_id"}), "crew_name": crew.name}
+    try:
+        content, content_type = assistant_client.post_bytes("/analyze-image/report", body)
+    except assistant_client.AssistantUnavailable as exc:
+        raise HTTPException(status_code=503, detail="Assistant service is not reachable") from exc
+    return Response(content=content, media_type=content_type,
+                     headers={"Content-Disposition": "attachment; filename=photo-check-report.pdf"})
 
 
 @router.get("/sample-images")

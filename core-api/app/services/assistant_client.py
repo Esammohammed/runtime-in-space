@@ -37,3 +37,14 @@ def get_bytes(path: str) -> tuple[bytes, str]:
         return response.content, response.headers.get("content-type", "application/octet-stream")
     except httpx.HTTPError as exc:
         raise AssistantUnavailable(str(exc)) from exc
+
+
+def post_bytes(path: str, payload: dict) -> tuple[bytes, str]:
+    settings = get_settings()
+    try:
+        response = httpx.post(f"{settings.assistant_url}{path}", json=payload,
+                              timeout=settings.http_timeout_seconds)
+        response.raise_for_status()
+        return response.content, response.headers.get("content-type", "application/octet-stream")
+    except httpx.HTTPError as exc:
+        raise AssistantUnavailable(str(exc)) from exc

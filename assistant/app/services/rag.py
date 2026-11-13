@@ -33,7 +33,12 @@ def _words(text: str) -> set[str]:
 
 @lru_cache
 def load_chunks() -> list[dict]:
-    """Every paragraph of every .md/.txt file, except the folder's README."""
+    """Every paragraph of every .md/.txt file, except the folder's README and
+    each file's own leading "Source: ..." attribution line. That line is
+    citation metadata, not content -- but it's packed with words like "NASA",
+    "Health" and "Countermeasures" that coincidentally match a lot of
+    questions, so keeping it as a scoreable chunk let it crowd out the
+    actual answer paragraphs from the same file."""
     folder = get_settings().content_dir / "nasa-docs"
     chunks = []
     if not folder.exists():
@@ -43,6 +48,8 @@ def load_chunks() -> list[dict]:
             continue
         for paragraph in re.split(r"\n\s*\n", path.read_text(encoding="utf-8")):
             paragraph = paragraph.strip()
+            if paragraph.startswith("#") or paragraph.startswith("Source:"):
+                continue
             if len(paragraph) > 40:
                 chunks.append({"title": path.name, "snippet": paragraph, "words": _words(paragraph)})
     return chunks

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import Card from '@/components/common/Card.jsx';
 import { useCrew } from '@/context/CrewContext.jsx';
-import { analyzeImage, fetchSampleImage, listSampleImages } from '@/services/assistantService.js';
+import { analyzeImage, downloadPhotoReport, fetchSampleImage, listSampleImages } from '@/services/assistantService.js';
 
 const URGENCY_LABELS = {
   watch: 'Keep watching',
@@ -21,6 +21,7 @@ export default function PhotoCheckPage() {
   const { selectedId } = useCrew();
   const [note, setNote] = useState('');
   const [result, setResult] = useState(null);
+  const [photo, setPhoto] = useState(null);
   const [samples, setSamples] = useState([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
@@ -41,16 +42,29 @@ export default function PhotoCheckPage() {
     }
   };
 
+  const analyze = async (blob) => {
+    const base64 = await toBase64(blob);
+    setPhoto({ base64, mimeType: blob.type });
+    setResult(await analyzeImage(selectedId, base64, blob.type, note.trim()));
+  };
+
   const onPhoto = (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    run(async () => setResult(await analyzeImage(selectedId, await toBase64(file), file.type, note.trim())));
+    run(() => analyze(file));
   };
 
   const onSample = (name) => {
+    run(async () => analyze(await fetchSampleImage(name)));
+  };
+
+  const onDownloadReport = () => {
     run(async () => {
-      const blob = await fetchSampleImage(name);
-      setResult(await analyzeImage(selectedId, await toBase64(blob), blob.type, note.trim()));
+      const pdf = await downloadPhotoReport(selectedId, photo.base64, photo.mimeType, note.trim(), result);
+      const url = URL.createObjectURL(pdf);
+      const link = Object.assign(document.createElement('a'), { href: url, download: 'photo-check-report.pdf' });
+      link.click();
+      URL.revokeObjectURL(url);
     });
   };
 
@@ -92,6 +106,11 @@ export default function PhotoCheckPage() {
           <p>{result.description}</p>
           <p><strong>Next step:</strong> {result.next_step}</p>
           <p><strong>Urgency:</strong> {URGENCY_LABELS[result.urgency] ?? result.urgency}</p>
+          <div className="row wrap">
+            <button type="button" className="button ghost" disabled={busy || !photo} onClick={onDownloadReport}>
+              Download PDF report
+            </button>
+          </div>
         </Card>
       )}
       {result?.skin_model && (
