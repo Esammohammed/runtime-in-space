@@ -1,0 +1,57 @@
+services:
+  core-api:
+    build: ./core-api
+    ports: ["8000:8000"]
+    environment:
+      CONTENT_DIR: /content
+      DATABASE_URL: sqlite:////data/core.db
+      FORECAST_URL: http://forecast:8002
+      ASSISTANT_URL: http://assistant:8003
+    volumes:
+      - ./content:/content:ro
+      - core-data:/data
+    depends_on: [forecast, assistant]
+
+  simulator:
+    build: ./simulator
+    ports: ["8001:8001"]
+    environment:
+      CONTENT_DIR: /content
+      CORE_API_URL: http://core-api:8000
+    volumes:
+      - ./content:/content:ro
+    depends_on: [core-api]
+
+  forecast:
+    build: ./forecast
+    ports: ["8002:8002"]
+    environment:
+      FORECAST_MODEL: ${FORECAST_MODEL:-linear}
+
+  assistant:
+    build: ./assistant
+    ports: ["8003:8003"]
+    environment:
+      CONTENT_DIR: /content
+      LLM_PROVIDER: ${LLM_PROVIDER:-mock}
+      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.openai.com/v1}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-gpt-4o-mini}
+    volumes:
+      - ./content:/content:ro
+
+  frontend:
+    image: node:20-alpine
+    working_dir: /app/frontend
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    ports: ["5173:5173"]
+    environment:
+      VITE_API_URL: http://localhost:8000
+      VITE_USE_MOCK: "false"
+    volumes:
+      - ./frontend:/app/frontend
+      - ./content:/app/content:ro
+    depends_on: [core-api]
+
+volumes:
+  core-data:
