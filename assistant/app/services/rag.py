@@ -96,7 +96,26 @@ def _hybrid_search(question: str, top_k: int) -> list[dict] | None:
     return results
 
 
+GREETING_WORDS = {
+    "hi", "hello", "hey", "good morning", "good evening", "good afternoon",
+    "howdy", "sup", "greetings", "thanks", "thank you", "bye", "goodbye",
+    "who are you", "what can you do", "help", "test", "hola", "marhaba", "salam"
+}
+
+
+def is_greeting_or_trivial(question: str) -> bool:
+    cleaned = re.sub(r"[^\w\s]", "", question.strip().lower())
+    if cleaned in GREETING_WORDS or len(cleaned) <= 3:
+        return True
+    words = cleaned.split()
+    if len(words) <= 2 and any(w in GREETING_WORDS for w in words):
+        return True
+    return False
+
+
 def search(question: str, top_k: int | None = None) -> list[dict]:
+    if is_greeting_or_trivial(question):
+        return []
     top_k = top_k or get_settings().rag_top_k
     results = _hybrid_search(question, top_k)
     if results is not None:

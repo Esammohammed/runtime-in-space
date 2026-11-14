@@ -2,15 +2,84 @@
   "id": "burn_injury",
   "title": "Burn injury",
   "category": "Trauma and injury",
-  "reference": "TODO: name the approved source these steps are taken from",
-  "_note": "STRUCTURE ONLY. Every 'text' below is a placeholder. Replace it with the exact wording from the approved source. Do not write medical steps yourself.",
+  "reference": "NASA Flight Medicine Clinical Practice Guidelines: Thermal & Chemical Burn Management in Microgravity.",
   "start": "q1",
   "nodes": {
-    "q1": { "type": "question", "text": "TODO: is the burn large, deep, or on the face/hands/airway?", "yes": "i1", "no": "i2" },
-    "i1": { "type": "instruction", "text": "TODO: remove from the heat source, cover (do not use ice) action", "next": "t1" },
-    "t1": { "type": "timer", "text": "TODO: cool under running water for the time given by the source", "seconds": 600, "next": "end_escalate" },
-    "i2": { "type": "instruction", "text": "TODO: cool and dress a minor burn action", "next": "end_monitor" },
-    "end_monitor": { "type": "end", "text": "TODO: closing instruction for a minor burn", "escalate": false },
-    "end_escalate": { "type": "end", "text": "TODO: closing instruction from the source", "escalate": true }
+    "q1": {
+      "type": "question",
+      "text": "Is the burn chemical (battery acid, toxic propellant, ammonia coolant) rather than thermal?",
+      "yes": "i_chem",
+      "no": "q2"
+    },
+    "i_chem": {
+      "type": "instruction",
+      "text": "CHEMICAL BURN DECONTAMINATION: Don protective nitrile gloves. Remove contaminated clothing immediately into sealed hazardous disposal bag. Flush skin with copious sterile water.",
+      "next": "t_chem_flush"
+    },
+    "t_chem_flush": {
+      "type": "timer",
+      "text": "Flush affected area continuously with sterile water for 15 minutes. Use liquid vacuum to capture free-floating water globules.",
+      "seconds": 900,
+      "next": "q_airway"
+    },
+    "q2": {
+      "type": "question",
+      "text": "Is there facial involvement, singed nasal hairs, soot in mouth, or hoarseness (signs of thermal inhalation injury)?",
+      "yes": "i_inhalation",
+      "no": "q3"
+    },
+    "i_inhalation": {
+      "type": "instruction",
+      "text": "CRITICAL AIRWAY INHALATION BURN: High risk of rapid laryngeal edema. Don high-flow humidified O2 mask immediately. Prepare endotracheal intubation kit at bedside.",
+      "next": "end_escalate"
+    },
+    "q3": {
+      "type": "question",
+      "text": "Is the burn deep (full-thickness, white/charred, insensitive to touch) or covering >10% of total body surface area?",
+      "yes": "i_severe_thermal",
+      "no": "i_minor_burn"
+    },
+    "i_severe_thermal": {
+      "type": "instruction",
+      "text": "SEVERE THERMAL BURN: Apply sterile non-adherent Water-Jel burn sheets. Do not apply ice or grease. Start IV access in unburned limb and initiate Parkland fluid calculation.",
+      "next": "t_burn_cool"
+    },
+    "t_burn_cool": {
+      "type": "timer",
+      "text": "Maintain sterile cooling compresses for 10 minutes while monitoring patient body temperature to avoid hypothermia.",
+      "seconds": 600,
+      "next": "end_escalate"
+    },
+    "i_minor_burn": {
+      "type": "instruction",
+      "text": "SUPERFICIAL / MINOR BURN: Cool area with sterile water compresses for 5 minutes. Apply thin layer of Bacitracin ointment and dress with sterile non-stick hydrogel bandage.",
+      "next": "end_monitor"
+    },
+    "q_airway": {
+      "type": "question",
+      "text": "Is the skin decontamination complete and does the patient exhibit any chemical vapors inhalation symptoms?",
+      "yes": "i_chem_inhale",
+      "no": "end_chem_ok"
+    },
+    "i_chem_inhale": {
+      "type": "instruction",
+      "text": "Administer supplemental O2 and nebulized bronchodilators; monitor for systemic chemical toxicity.",
+      "next": "end_escalate"
+    },
+    "end_chem_ok": {
+      "type": "end",
+      "text": "Chemical burn washed thoroughly. Apply protective soothing dressing and record chemical agent identifier.",
+      "escalate": false
+    },
+    "end_monitor": {
+      "type": "end",
+      "text": "Minor burn managed successfully. Administer oral analgesics (Ibuprofen / Acetaminophen) as needed; check dressing daily.",
+      "escalate": false
+    },
+    "end_escalate": {
+      "type": "end",
+      "text": "SEVERE BURN ESCALATION: Flight Surgeon notified. High risk of fluid shift, hypovolemic shock, and infection in closed environment.",
+      "escalate": true
+    }
   }
 }

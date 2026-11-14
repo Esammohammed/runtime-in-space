@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Icon } from '@/components/common/Icons.jsx';
+import FormattedReport from '@/components/common/FormattedReport.jsx';
+import SpeakButton from '@/components/common/SpeakButton.jsx';
 
 export default function ProtocolRunner({
   protocol,
@@ -10,6 +12,45 @@ export default function ProtocolRunner({
 }) {
   const [nodeId, setNodeId] = useState(protocol?.start || 'q1');
   const [secondsLeft, setSecondsLeft] = useState(null);
+  const [streamedText, setStreamedText] = useState('');
+  const [isStreaming, setIsStreaming] = useState(false);
+  const streamTimerRef = useRef(null);
+  const lastReportIdRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (streamTimerRef.current) clearInterval(streamTimerRef.current);
+    };
+  }, []);
+
+  // Live streaming typewriter animation when a new emergency report arrives
+  useEffect(() => {
+    const report = reportStatus?.report;
+    if (!report || report.id === lastReportIdRef.current) return;
+    lastReportIdRef.current = report.id;
+
+    const fullText = report.text || '';
+    const tokens = fullText.match(/\S+|\s+/g) || [];
+    let index = 0;
+    let currentText = '';
+
+    setStreamedText('');
+    setIsStreaming(true);
+
+    if (streamTimerRef.current) clearInterval(streamTimerRef.current);
+    streamTimerRef.current = setInterval(() => {
+      if (index < tokens.length) {
+        currentText += tokens[index];
+        index++;
+        setStreamedText(currentText);
+      } else {
+        clearInterval(streamTimerRef.current);
+        streamTimerRef.current = null;
+        setIsStreaming(false);
+        setStreamedText(fullText);
+      }
+    }, 15);
+  }, [reportStatus?.report]);
 
   // Keep nodeId updated if protocol changes
   useEffect(() => {
@@ -82,7 +123,17 @@ export default function ProtocolRunner({
 
       {/* Main clinical instruction display */}
       <div className="protocol-instruction-zone">
-        <p className="protocol-large-text">{node.text || 'Follow standard stabilization procedure.'}</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+          <p className="protocol-large-text" style={{ margin: 0, flex: 1 }}>
+            {node.text || 'Follow standard stabilization procedure.'}
+          </p>
+          {node.text && (
+            <SpeakButton
+              text={node.text}
+              label="Audio Step"
+            />
+          )}
+        </div>
       </div>
 
       {/* QUESTION NODE: YES / NO */}
@@ -184,8 +235,21 @@ export default function ProtocolRunner({
 
           {reportStatus?.report && (
             <div className="report-preview-box mt-3">
-              <span className="muted small">Saved to astronaut medical file · Status: {reportStatus.report.state}</span>
-              <p className="prewrap small">{reportStatus.report.text}</p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <span className="muted small">
+                  Saved to astronaut medical file · Status: {reportStatus.report.state}
+                </span>
+                {!isStreaming && (
+                  <SpeakButton
+                    text={reportStatus.report.text}
+                    label="Audio Incident Report"
+                  />
+                )}
+              </div>
+              <FormattedReport
+                text={isStreaming ? streamedText : reportStatus.report.text}
+                isStreaming={isStreaming}
+              />
             </div>
           )}
         </div>

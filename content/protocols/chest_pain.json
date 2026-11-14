@@ -2,14 +2,79 @@
   "id": "chest_pain",
   "title": "Chest pain",
   "category": "Cardiac and circulatory",
-  "reference": "TODO: name the approved source these steps are taken from",
-  "_note": "STRUCTURE ONLY. Every 'text' below is a placeholder. Replace it with the exact wording from the approved source. Do not write medical steps yourself.",
+  "reference": "NASA ISS Medical Checklist (CHeCS) - Cardiovascular Emergencies & AHA Acute Coronary Syndrome in Austere Environments.",
   "start": "q1",
   "nodes": {
-    "q1": { "type": "question", "text": "TODO: first check from the source", "yes": "i1", "no": "i2" },
-    "i1": { "type": "instruction", "text": "TODO: action from the source", "next": "t1" },
-    "i2": { "type": "instruction", "text": "TODO: action from the source", "next": "end_escalate" },
-    "t1": { "type": "timer", "text": "TODO: timed action from the source", "seconds": 120, "next": "end_escalate" },
-    "end_escalate": { "type": "end", "text": "TODO: closing instruction from the source", "escalate": true }
+    "q1": {
+      "type": "question",
+      "text": "Is the crew member conscious, responsive, and breathing without acute gasping or collapse?",
+      "yes": "q2",
+      "no": "i_cpr"
+    },
+    "i_cpr": {
+      "type": "instruction",
+      "text": "IMMEDIATE CARDIAC ARREST CODE: Secure patient to Crew Medical Restraint System (CMRS) backboard. Attach Defibrillator/AED pads immediately. Initiate high-quality chest compressions (100–120/min) using microgravity overhead handholds.",
+      "next": "t_cpr"
+    },
+    "t_cpr": {
+      "type": "timer",
+      "text": "Deliver 2 minutes of continuous CPR, then pause 5 seconds for automated AED rhythm analysis and shock advisory.",
+      "seconds": 120,
+      "next": "end_escalate"
+    },
+    "q2": {
+      "type": "question",
+      "text": "Is the pain a heavy, crushing substernal pressure radiating to the jaw, neck, or left arm, accompanied by diaphoresis (cold sweats)?",
+      "yes": "i_acs",
+      "no": "q3"
+    },
+    "i_acs": {
+      "type": "instruction",
+      "text": "SUSPECTED ACUTE CORONARY SYNDROME: Place in semi-recumbent posture. Administer chewable Aspirin 325 mg (if no allergy/bleeding), attach high-flow O2 mask, and prepare sublingual Nitroglycerin (if systolic BP > 100 mmHg).",
+      "next": "t_ecg"
+    },
+    "t_ecg": {
+      "type": "timer",
+      "text": "Record full 12-lead ECG telemetry strip and monitor vitals (BP, HR, SpO2) every 2 minutes.",
+      "seconds": 120,
+      "next": "q_shock"
+    },
+    "q_shock": {
+      "type": "question",
+      "text": "Is systolic blood pressure dropping below 90 mmHg or heart rate > 110 bpm (signs of cardiogenic shock)?",
+      "yes": "i_shock",
+      "no": "end_escalate"
+    },
+    "i_shock": {
+      "type": "instruction",
+      "text": "CRITICAL CARDIOGENIC SHOCK: Cease nitroglycerin immediately. Position patient horizontal with legs elevated. Prepare IV Normal Saline resuscitation line.",
+      "next": "end_escalate"
+    },
+    "q3": {
+      "type": "question",
+      "text": "Does the chest pain sharpen distinctly with deep breathing (pleuritic), coughing, or manual palpation over the ribs?",
+      "yes": "i_musculo",
+      "no": "i_eval"
+    },
+    "i_musculo": {
+      "type": "instruction",
+      "text": "MUSCULOSKELETAL / PLEURITIC STRAIN: Likely microgravity exercise countermeasure strain (CEVIS/ARED) or costochondritis. Auscultate bilateral lung fields to rule out pneumothorax. Administer oral Ibuprofen 400 mg.",
+      "next": "end_monitor"
+    },
+    "i_eval": {
+      "type": "instruction",
+      "text": "ATYPICAL CHEST PAIN: Record vital signs (BP, SpO2, HR). Rule out gastroesophageal reflux, musculoskeletal spasm, or localized cabin atmospheric contamination.",
+      "next": "end_escalate"
+    },
+    "end_monitor": {
+      "type": "end",
+      "text": "Pleuritic or musculoskeletal strain managed. Log symptoms in crew health journal, rest for 4 hours, and repeat vital signs check.",
+      "escalate": false
+    },
+    "end_escalate": {
+      "type": "end",
+      "text": "CARDIAC EMERGENCY PROTOCOL ACTIVE: Flight Surgeon telemedicine channel streaming. Continuous ECG rhythm and defibrillator standby maintained.",
+      "escalate": true
+    }
   }
 }

@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Card from '@/components/common/Card.jsx';
 import { Icon } from '@/components/common/Icons.jsx';
+import FormattedReport from '@/components/common/FormattedReport.jsx';
+import SpeakButton from '@/components/common/SpeakButton.jsx';
 import { useCrew } from '@/context/CrewContext.jsx';
 import { createReport, listReports } from '@/services/crewService.js';
 import { listEvents } from '@/services/eventsService.js';
@@ -11,8 +13,19 @@ export default function CrewPage() {
   const { selected, selectedId, switchIdentity } = useCrew();
   const [reports, setReports] = useState([]);
   const [events, setEvents] = useState([]);
+  const [activeReportId, setActiveReportId] = useState(null);
+  const [copiedId, setCopiedId] = useState(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
+  const [streamingReportId, setStreamingReportId] = useState(null);
+  const [streamingText, setStreamingText] = useState('');
+  const streamTimerRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (streamTimerRef.current) clearInterval(streamTimerRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     if (!selectedId) return;
@@ -20,6 +33,9 @@ export default function CrewPage() {
       .then(([reportList, eventList]) => {
         setReports(reportList);
         setEvents(eventList);
+        if (reportList && reportList.length > 0) {
+          setActiveReportId(reportList[0].id);
+        }
       })
       .catch(setError);
   }, [selectedId]);
@@ -30,10 +46,47 @@ export default function CrewPage() {
     try {
       const report = await createReport(selectedId);
       setReports((current) => [report, ...current]);
+      setActiveReportId(report.id);
+
+      // Start live streaming typewriter effect for the newly compiled report
+      const fullText = report.text || '';
+      const tokens = fullText.match(/\S+|\s+/g) || [];
+      let index = 0;
+      let currentText = '';
+
+      setStreamingReportId(report.id);
+      setStreamingText('');
+
+      if (streamTimerRef.current) clearInterval(streamTimerRef.current);
+      streamTimerRef.current = setInterval(() => {
+        if (index < tokens.length) {
+          currentText += tokens[index];
+          index++;
+          setStreamingText(currentText);
+        } else {
+          clearInterval(streamTimerRef.current);
+          streamTimerRef.current = null;
+          setStreamingReportId(null);
+          setStreamingText('');
+        }
+      }, 15);
     } catch (reportError) {
       setError(reportError);
     } finally {
       setBusy(false);
+    }
+  };
+
+  const toggleExpand = (id) => {
+    setActiveReportId((current) => (current === id ? null : id));
+  };
+
+  const copyReport = (report, e) => {
+    e.stopPropagation();
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(report.text);
+      setCopiedId(report.id);
+      setTimeout(() => setCopiedId(null), 2000);
     }
   };
 
@@ -176,19 +229,69 @@ export default function CrewPage() {
             </div>
 
             <div className="reports-feed-list mt-3">
-              {reports.map((report) => (
-                <article key={report.id} className="report-item-card">
-                  <div className="report-header-line">
-                    <span className="report-timestamp muted small font-mono">
-                      {formatTime(report.created_at)}
-                    </span>
-                    <span className={`report-state-pill state-${report.state}`}>
-                      {report.state}
-                    </span>
-                  </div>
-                  <p className="report-body-text prewrap">{report.text}</p>
-                </article>
-              ))}
+              {reports.map((report, index) => {
+                const isExpanded = activeReportId === report.id;
+                const isCopied = copiedId === report.id;
+                const reportNum = reports.length - index;
+                return (
+                  <article
+                    key={report.id}
+                    className={`report-item-card ${isExpanded ? 'is-expanded' : 'is-collapsed'}`}
+                  >
+                    <header
+                      className="report-item-header"
+                      onClick={() => toggleExpand(report.id)}
+                    >
+                      <div className="report-header-left">
+                        <span className="report-expand-icon">
+                          <Icon
+                            name={isExpanded ? 'chevron-down' : 'chevron-right'}
+                            size={14}
+                            color="var(--cyan)"
+                          />
+                        </span>
+                        <div className="report-header-titles">
+                          <span className="report-badge-num">Report #{reportNum}</span>
+                          <strong className="report-title-label font-mono">
+                            {formatTime(report.created_at)}
+                          </strong>
+                          <span className={`report-state-pill state-${report.state}`}>
+                            {report.state || 'ready'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="report-header-actions" onClick={(e) => e.stopPropagation()} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        {report.text && (
+                          <SpeakButton text={report.text} label="Audio Report" />
+                        )}
+                        <button
+                          type="button"
+                          className="report-copy-btn"
+                          title="Copy Report to Clipboard"
+                          onClick={(e) => copyReport(report, e)}
+                        >
+                          <Icon
+                            name={isCopied ? 'check' : 'clipboard'}
+                            size={13}
+                            color={isCopied ? 'var(--green)' : 'currentColor'}
+                          />
+                          <span>{isCopied ? 'Copied' : 'Copy'}</span>
+                        </button>
+                      </div>
+                    </header>
+
+                    {isExpanded && (
+                      <div className="report-expanded-content">
+                        <FormattedReport
+                          text={streamingReportId === report.id ? streamingText : report.text}
+                          isStreaming={streamingReportId === report.id}
+                        />
+                      </div>
+                    )}
+                  </article>
+                );
+              })}
               {reports.length === 0 && (
                 <div className="empty-reports-box">
                   <p className="muted small">No clinical reports compiled yet for this astronaut.</p>

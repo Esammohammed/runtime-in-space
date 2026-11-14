@@ -53,7 +53,12 @@ class OpenAICompatibleLLM:
         messages.extend(history or [])
         messages.append({"role": "user", "content": content})
         headers = {"Authorization": f"Bearer {self._settings.llm_api_key}"} if self._settings.llm_api_key else {}
-        payload = {"model": self._settings.llm_model, "temperature": 0.2, "messages": messages}
+        payload = {
+            "model": self._settings.llm_model,
+            "temperature": 0.1,
+            "max_tokens": 600,
+            "messages": messages,
+        }
         try:
             response = httpx.post(f"{self._settings.llm_base_url}/chat/completions", json=payload,
                                   headers=headers, timeout=self._settings.llm_timeout_seconds)

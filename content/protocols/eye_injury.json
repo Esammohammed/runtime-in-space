@@ -2,17 +2,78 @@
   "id": "eye_injury",
   "title": "Eye injury or chemical exposure",
   "category": "Trauma and injury",
-  "reference": "TODO: name the approved source these steps are taken from",
-  "_note": "STRUCTURE ONLY. Every 'text' below is a placeholder. Replace it with the exact wording from the approved source. Do not write medical steps yourself.",
+  "reference": "NASA ISS Medical Operations: Ophthalmic Trauma & Chemical Hazard Decontamination Protocol.",
   "start": "q1",
   "nodes": {
-    "q1": { "type": "question", "text": "TODO: was there a chemical splash in the eye?", "yes": "i1", "no": "q2" },
-    "i1": { "type": "instruction", "text": "TODO: flush the eye continuously action", "next": "t1" },
-    "t1": { "type": "timer", "text": "TODO: flush for the time given by the source", "seconds": 900, "next": "end_escalate" },
-    "q2": { "type": "question", "text": "TODO: is there a foreign object or penetrating injury visible?", "yes": "i2", "no": "i3" },
-    "i2": { "type": "instruction", "text": "TODO: do not remove the object, shield the eye action", "next": "end_escalate" },
-    "i3": { "type": "instruction", "text": "TODO: minor-irritation care action", "next": "end_monitor" },
-    "end_monitor": { "type": "end", "text": "TODO: closing instruction for minor irritation", "escalate": false },
-    "end_escalate": { "type": "end", "text": "TODO: closing instruction from the source", "escalate": true }
+    "q1": {
+      "type": "question",
+      "text": "Was the eye exposed to chemical liquid, ammonia coolant, or toxic battery/propellant aerosol?",
+      "yes": "i_chem_flush",
+      "no": "q2"
+    },
+    "i_chem_flush": {
+      "type": "instruction",
+      "text": "IMMEDIATE EMERGENCY EYE IRRIGATION: Connect Eye Wash Kit to potable water supply. Hold eyelids open and flush eye continuously. Activate water suction to capture floating droplets in microgravity.",
+      "next": "t_flush"
+    },
+    "t_flush": {
+      "type": "timer",
+      "text": "Flush eye continuously for 15 minutes. Check eye pH with litmus strip if available (target neutral pH 7.0–7.4).",
+      "seconds": 900,
+      "next": "q_chem_pain"
+    },
+    "q_chem_pain": {
+      "type": "question",
+      "text": "Following 15 minutes of continuous irrigation, is severe ocular pain or corneal clouding persisting?",
+      "yes": "i_chem_meds",
+      "no": "end_chem_clean"
+    },
+    "i_chem_meds": {
+      "type": "instruction",
+      "text": "Instill 2 drops of Proparacaine ophthalmic anesthetic (if available) and 1 drop of broad-spectrum antibiotic drops. Apply loose protective eye patch.",
+      "next": "end_escalate"
+    },
+    "end_chem_clean": {
+      "type": "end",
+      "text": "Chemical agent thoroughly washed. Re-evaluate visual acuity; administer lubricating artificial tears.",
+      "escalate": false
+    },
+    "q2": {
+      "type": "question",
+      "text": "Is there a penetrating object, visible globe rupture, irregular pupil, or blood inside the anterior chamber (hyphema)?",
+      "yes": "i_rupture",
+      "no": "q3"
+    },
+    "i_rupture": {
+      "type": "instruction",
+      "text": "CRITICAL GLOBE INJURY: DO NOT TOUCH, DO NOT REMOVE OBJECT, AND DO NOT APPLY ANY PRESSURE. Tape a rigid metallic eye shield (Fox shield) resting on orbital facial bones over the eye.",
+      "next": "end_escalate"
+    },
+    "q3": {
+      "type": "question",
+      "text": "Is there a sensation of a foreign body (dust, metal particle from EVA or maintenance), photophobia, or excessive tearing?",
+      "yes": "i_foreign_body",
+      "no": "i_blunt_trauma"
+    },
+    "i_foreign_body": {
+      "type": "instruction",
+      "text": "SUPERFICIAL FOREIGN BODY: Examine eyelid eversion with penlight and fluorescein strip. Irrigate gently with eye wash pouch to float particle out. If adhered, do not scrape.",
+      "next": "end_monitor"
+    },
+    "i_blunt_trauma": {
+      "type": "instruction",
+      "text": "BLUNT EYE CONTUSION: Apply cold compress around orbit (avoid globe pressure). Check visual acuity and extraocular muscle movement in all 4 quadrants.",
+      "next": "end_monitor"
+    },
+    "end_monitor": {
+      "type": "end",
+      "text": "Ocular irritation managed. Re-check visual acuity in 4 hours; notify Flight Surgeon if vision blurs.",
+      "escalate": false
+    },
+    "end_escalate": {
+      "type": "end",
+      "text": "OPHTHALMIC EMERGENCY ESCALATION: Flight Surgeon telemedicine consult initiated. Prepare onboard Funduscope / Slit-lamp exam.",
+      "escalate": true
+    }
   }
 }

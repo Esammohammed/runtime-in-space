@@ -6,6 +6,17 @@ import { useCrew } from '@/context/CrewContext.jsx';
 import { PROTOCOLS } from '@/data/protocols.js';
 import { createReport } from '@/services/crewService.js';
 import { logEvent } from '@/services/eventsService.js';
+import { addFinding } from '@/services/clinicalFindingsService.js';
+
+const PROTOCOL_BODY_MAP = {
+  burn_injury: { location: 'right_hand', locationLabel: 'Right Hand / Forearm' },
+  severe_bleeding: { location: 'right_hand', locationLabel: 'Right Hand / Forearm' },
+  eye_injury: { location: 'head', locationLabel: 'Head & Face' },
+  chest_pain: { location: 'torso', locationLabel: 'Chest & Torso' },
+  breathing_difficulty: { location: 'torso', locationLabel: 'Chest & Torso' },
+  stroke_like_symptoms: { location: 'head', locationLabel: 'Head & Face' },
+  allergic_reaction: { location: 'torso', locationLabel: 'Whole Body / Skin' },
+};
 
 function groupByCategory(protocols) {
   const groups = new Map();
@@ -15,6 +26,43 @@ function groupByCategory(protocols) {
     groups.get(category).push(protocol);
   }
   return groups;
+}
+
+function getProtocolIcon(item) {
+  switch (item.id) {
+    case 'chest_pain':
+      return 'heart';
+    case 'breathing_difficulty':
+      return 'wind';
+    case 'stroke_like_symptoms':
+      return 'activity';
+    case 'loss_of_consciousness':
+      return 'user';
+    case 'severe_bleeding':
+      return 'droplet';
+    case 'burn_injury':
+      return 'flame';
+    case 'eye_injury':
+      return 'shield';
+    case 'radiation_exposure':
+      return 'radiation';
+    case 'decompression':
+      return 'orbit';
+    case 'allergic_reaction':
+      return 'shield';
+    case 'psychological_crisis':
+      return 'moon';
+    default: {
+      const cat = (item.category || '').toLowerCase();
+      if (cat.includes('cardiac')) return 'heart';
+      if (cat.includes('respiratory')) return 'wind';
+      if (cat.includes('trauma')) return 'shield';
+      if (cat.includes('environmental')) return 'orbit';
+      if (cat.includes('neurological')) return 'activity';
+      if (cat.includes('behavioral')) return 'moon';
+      return 'shield';
+    }
+  }
 }
 
 const IDLE_REPORT = { busy: false, report: null, error: null };
@@ -42,6 +90,20 @@ export default function EmergencyPage() {
     setReportStatus(IDLE_REPORT);
     try {
       logEvent(selectedId, `Emergency protocol started: ${chosen.title}`, { protocol: chosen.id });
+      // Map emergency incident to 3D Mannequin Hotspot
+      const map = PROTOCOL_BODY_MAP[chosen.id];
+      if (map) {
+        addFinding(selectedId, {
+          id: `em-${chosen.id}`,
+          location: map.location,
+          locationLabel: map.locationLabel,
+          title: chosen.title,
+          description: `Active resuscitation emergency protocol initiated: ${chosen.title}`,
+          next_step: 'Follow step-by-step microgravity stabilization actions',
+          urgency: 'alert_ground',
+          source: 'Emergency Medical Protocol',
+        });
+      }
     } catch {
       // Offline fallback: never block emergency protocols
     }
@@ -117,7 +179,7 @@ export default function EmergencyPage() {
 
           {/* Search bar */}
           <div className="emergency-search-bar">
-            <Icon name="shield" size={16} color="var(--coral)" />
+            <Icon name="shield" size={16} color="var(--muted)" />
             <input
               type="text"
               placeholder="Search protocol (e.g. chest pain, bleeding, burn, consciousness)…"
@@ -145,6 +207,7 @@ export default function EmergencyPage() {
               <div className="protocol-buttons-grid">
                 {items.map((item) => {
                   const isCurrent = activeProtocol?.id === item.id;
+                  const iconName = getProtocolIcon(item);
                   return (
                     <button
                       key={item.id}
@@ -153,7 +216,11 @@ export default function EmergencyPage() {
                       onClick={() => start(item)}
                     >
                       <span className="protocol-btn-icon">
-                        <Icon name="emergency" size={20} color={isCurrent ? '#FFFFFF' : 'var(--coral)'} />
+                        <Icon
+                          name={iconName}
+                          size={18}
+                          color={isCurrent ? '#FFFFFF' : 'var(--cyan)'}
+                        />
                       </span>
                       <div className="protocol-btn-info">
                         <strong className="protocol-btn-title">{item.title}</strong>
@@ -161,7 +228,13 @@ export default function EmergencyPage() {
                           {isCurrent ? 'Active Protocol' : 'Tap to start →'}
                         </span>
                       </div>
-                      <Icon name="chevron-right" size={18} color="var(--coral)" />
+                      <span className="protocol-btn-chevron">
+                        <Icon
+                          name="chevron-right"
+                          size={16}
+                          color={isCurrent ? 'var(--coral)' : 'var(--muted)'}
+                        />
+                      </span>
                     </button>
                   );
                 })}

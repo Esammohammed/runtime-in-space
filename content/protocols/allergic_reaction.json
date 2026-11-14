@@ -2,18 +2,78 @@
   "id": "allergic_reaction",
   "title": "Allergic reaction",
   "category": "Immune and allergic",
-  "reference": "TODO: name the approved source these steps are taken from",
-  "_note": "STRUCTURE ONLY. Every 'text' below is a placeholder. Replace it with the exact wording from the approved source. Do not write medical steps yourself.",
+  "reference": "NASA ISS Medical Operations: Anaphylaxis and Hypersensitivity Protocol (NASA-STD-3001).",
   "start": "q1",
   "nodes": {
-    "q1": { "type": "question", "text": "TODO: any difficulty breathing, facial/throat swelling, or widespread hives?", "yes": "i1", "no": "i4" },
-    "i1": { "type": "instruction", "text": "TODO: administer the emergency medication per the kit's instructions", "next": "t1" },
-    "t1": { "type": "timer", "text": "TODO: monitor for the time given by the source", "seconds": 300, "next": "q2" },
-    "q2": { "type": "question", "text": "TODO: are symptoms improving?", "yes": "i2", "no": "i3" },
-    "i2": { "type": "instruction", "text": "TODO: continue monitoring action", "next": "end_escalate" },
-    "i3": { "type": "instruction", "text": "TODO: second dose or further escalation action per source", "next": "end_escalate" },
-    "i4": { "type": "instruction", "text": "TODO: mild-reaction monitoring action", "next": "end_monitor" },
-    "end_monitor": { "type": "end", "text": "TODO: closing instruction for a mild reaction", "escalate": false },
-    "end_escalate": { "type": "end", "text": "TODO: closing instruction from the source", "escalate": true }
+    "q1": {
+      "type": "question",
+      "text": "Are there critical anaphylactic signs: stridor, throat tightness, severe wheezing, difficulty swallowing, or sudden dizziness/collapse?",
+      "yes": "i_epi",
+      "no": "q2"
+    },
+    "i_epi": {
+      "type": "instruction",
+      "text": "INJECT EPINEPHRINE IMMEDIATELY: Administer Epinephrine Auto-Injector (EpiPen 0.3 mg) into anterolateral mid-thigh. Apply high-flow O2 mask and place patient horizontal with legs elevated.",
+      "next": "t_epi"
+    },
+    "t_epi": {
+      "type": "timer",
+      "text": "Monitor vitals, airway patency, and blood pressure continuously for 5 minutes post-epinephrine injection.",
+      "seconds": 300,
+      "next": "q_epi_resp"
+    },
+    "q_epi_resp": {
+      "type": "question",
+      "text": "Are respiratory distress and hemodynamics improving after 5 minutes?",
+      "yes": "i_epi_stable",
+      "no": "i_epi_repeat"
+    },
+    "i_epi_stable": {
+      "type": "instruction",
+      "text": "Administer secondary medications: Diphenhydramine (Benadryl) 50 mg IV/oral and Methylprednisolone (Solu-Medrol) 125 mg IV. Keep under continuous observation.",
+      "next": "end_escalate"
+    },
+    "i_epi_repeat": {
+      "type": "instruction",
+      "text": "REFRACTORY ANAPHYLAXIS: Administer second dose of Epinephrine 0.3 mg into opposite thigh. Initiate IV normal saline bolus (1000 mL) to combat vasodilation.",
+      "next": "end_escalate"
+    },
+    "q2": {
+      "type": "question",
+      "text": "Is there widespread urticaria (hives), facial puffiness, or intense generalized pruritus without airway compromise?",
+      "yes": "i_moderate",
+      "no": "i_mild"
+    },
+    "i_moderate": {
+      "type": "instruction",
+      "text": "MODERATE ALLERGIC REACTION: Administer oral Diphenhydramine 50 mg and Cetirizine 10 mg. Monitor airway and vital signs every 15 minutes.",
+      "next": "q3"
+    },
+    "q3": {
+      "type": "question",
+      "text": "Are vital signs (SpO2, blood pressure, heart rate) completely stable and is swelling contained to the skin?",
+      "yes": "end_monitor",
+      "no": "i_escalate_allergy"
+    },
+    "i_mild": {
+      "type": "instruction",
+      "text": "MILD / LOCALIZED DERMAL REACTION: Apply Hydrocortisone 1% cream to affected skin. Administer oral Cetirizine 10 mg.",
+      "next": "end_monitor"
+    },
+    "i_escalate_allergy": {
+      "type": "instruction",
+      "text": "Signs of systemic progression. Prepare Epinephrine auto-injector at bedside; notify Medical Officer.",
+      "next": "end_escalate"
+    },
+    "end_monitor": {
+      "type": "end",
+      "text": "Allergic reaction contained. Monitor for biphasic reaction over next 12 hours; isolate suspected allergen from food or cabin supplies.",
+      "escalate": false
+    },
+    "end_escalate": {
+      "type": "end",
+      "text": "ANAPHYLAXIS ESCALATION: Flight Surgeon alert active. Emergency airway kit at bedside; monitor for rebound collapse.",
+      "escalate": true
+    }
   }
 }

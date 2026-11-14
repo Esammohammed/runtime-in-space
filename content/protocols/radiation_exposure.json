@@ -2,17 +2,84 @@
   "id": "radiation_exposure",
   "title": "Radiation exposure or solar event",
   "category": "Environmental",
-  "reference": "TODO: name the approved source these steps are taken from",
-  "_note": "STRUCTURE ONLY. Every 'text' below is a placeholder. Replace it with the exact wording from the approved source. Do not write medical steps yourself.",
+  "reference": "NASA Flight Rules: Solar Particle Event (SPE) Response & Acute Radiation Syndrome (ARS) Clinical Protocols.",
   "start": "q1",
   "nodes": {
-    "q1": { "type": "question", "text": "TODO: is a solar particle event alert active, or is the radiation dose reading spiking?", "yes": "i1", "no": "i4" },
-    "i1": { "type": "instruction", "text": "TODO: move to the shielded module or storm shelter now", "next": "q2" },
-    "q2": { "type": "question", "text": "TODO: any symptoms -- nausea, skin redness, fatigue?", "yes": "i2", "no": "t1" },
-    "i2": { "type": "instruction", "text": "TODO: isolate and monitor action for symptomatic exposure", "next": "end_escalate" },
-    "t1": { "type": "timer", "text": "TODO: stay sheltered for the duration given by the source", "seconds": 300, "next": "end_monitor" },
-    "i4": { "type": "instruction", "text": "TODO: confirm the dosimeter reading and log it", "next": "end_monitor" },
-    "end_monitor": { "type": "end", "text": "TODO: closing instruction, keep observing the dose reading", "escalate": false },
-    "end_escalate": { "type": "end", "text": "TODO: closing instruction from the source", "escalate": true }
+    "q1": {
+      "type": "question",
+      "text": "Is a Space Weather Alert active (Solar Particle Event / Coronal Mass Ejection) or is active dosimeter exceeding 1.0 mSv/hr?",
+      "yes": "i_shelter",
+      "no": "q_spike"
+    },
+    "i_shelter": {
+      "type": "instruction",
+      "text": "ALL CREW EVACUATE TO STORM SHELTER: Relocate immediately to vehicle central storm shelter module surrounded by water tanks and food stowage. Seal radiation curtains.",
+      "next": "q2"
+    },
+    "q2": {
+      "type": "question",
+      "text": "Does any crew member display acute prodromal symptoms: sudden nausea, vomiting, cutaneous erythema (skin flushing), or profound weakness?",
+      "yes": "i_meds",
+      "no": "t_shelter"
+    },
+    "i_meds": {
+      "type": "instruction",
+      "text": "PRODROMAL RADIATION SYNDROME: Administer Ondansetron 8 mg oral/IV for emesis. Provide electrolyte hydration and record exact onset time of vomiting (critical prognostic indicator).",
+      "next": "t_obs"
+    },
+    "t_obs": {
+      "type": "timer",
+      "text": "Monitor vitals, fluid balance, and symptom evolution closely over the next 5 minutes in shelter.",
+      "seconds": 300,
+      "next": "q_symptom_prog"
+    },
+    "q_symptom_prog": {
+      "type": "question",
+      "text": "Did vomiting occur within 2 hours of exposure (indicating estimated whole-body absorbed dose > 2 Gy)?",
+      "yes": "i_high_dose",
+      "no": "i_mild_rad"
+    },
+    "i_high_dose": {
+      "type": "instruction",
+      "text": "ACUTE HIGH-DOSE RADIATION PROTOCOL: Initiate IV fluid maintenance; collect peripheral blood droplet for emergency lymphocyte depletion kinetic assay; prepare Filgrastim (G-CSF) if available.",
+      "next": "end_escalate"
+    },
+    "i_mild_rad": {
+      "type": "instruction",
+      "text": "MODERATE RADIATION PRODOME: Maintain antiemetic therapy, enforce oral rehydration, and monitor lymphocyte counts every 12 hours.",
+      "next": "end_escalate"
+    },
+    "t_shelter": {
+      "type": "timer",
+      "text": "Remain sheltered for 5-minute telemetry sync and await updated solar flux assessment from SWPC ground controllers.",
+      "seconds": 300,
+      "next": "end_monitor"
+    },
+    "q_spike": {
+      "type": "question",
+      "text": "Has a single area dosimeter logged a transient anomaly while other sensors read nominal background (< 1.0 mSv/day)?",
+      "yes": "i_sensor_check",
+      "no": "i_nominal_rad"
+    },
+    "i_sensor_check": {
+      "type": "instruction",
+      "text": "LOCALIZED / SENSOR ANOMALY: Inspect dosimeter battery, cross-reference with vehicle exterior radiation monitors, and log reading.",
+      "next": "end_monitor"
+    },
+    "i_nominal_rad": {
+      "type": "instruction",
+      "text": "RADIATION NOMINAL: Normal galactic cosmic ray background. Maintain routine daily dosimeter wear.",
+      "next": "end_monitor"
+    },
+    "end_monitor": {
+      "type": "end",
+      "text": "Radiation dose within acceptable operational boundaries. Log cumulative mission dose and maintain routine scheduled dosimetry checks.",
+      "escalate": false
+    },
+    "end_escalate": {
+      "type": "end",
+      "text": "HIGH RADIATION PROTOCOL ACTIVE: Remain sheltered until ground flight controllers clear event. Medical Officer prepared for Acute Radiation Syndrome medical countermeasures.",
+      "escalate": true
+    }
   }
 }

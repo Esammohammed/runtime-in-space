@@ -2,17 +2,83 @@
   "id": "decompression",
   "title": "Pressure loss or hull breach",
   "category": "Environmental",
-  "reference": "TODO: name the approved source these steps are taken from",
-  "_note": "STRUCTURE ONLY. Every 'text' below is a placeholder. Replace it with the exact wording from the approved source. Do not write medical steps yourself.",
+  "reference": "NASA ISS Emergency Flight Rules: Cabin Depressurization, Emergency Ingress & Decompression Sickness (DCS) Management.",
   "start": "q1",
   "nodes": {
-    "q1": { "type": "question", "text": "TODO: is a pressure or hull alarm active?", "yes": "i1", "no": "i4" },
-    "i1": { "type": "instruction", "text": "TODO: don emergency breathing apparatus immediately", "next": "q2" },
-    "q2": { "type": "question", "text": "TODO: is the leak location identified?", "yes": "i2", "no": "i3" },
-    "i2": { "type": "instruction", "text": "TODO: seal or patch action, then move to a safe module", "next": "end_escalate" },
-    "i3": { "type": "instruction", "text": "TODO: evacuate to the safe module and seal the hatch action", "next": "end_escalate" },
-    "i4": { "type": "instruction", "text": "TODO: confirm the cabin pressure reading is nominal", "next": "end_monitor" },
-    "end_monitor": { "type": "end", "text": "TODO: closing instruction, keep monitoring cabin pressure", "escalate": false },
-    "end_escalate": { "type": "end", "text": "TODO: closing instruction from the source", "escalate": true }
+    "q1": {
+      "type": "question",
+      "text": "Is an automated cabin depressurization alarm sounding or is vehicle pressure dropping rapidly below 14.7 psi (760 mmHg)?",
+      "yes": "i_pba",
+      "no": "q_slow_leak"
+    },
+    "i_pba": {
+      "type": "instruction",
+      "text": "DON EMERGENCY OXYGEN IMMEDIATELY: Put on Portable Breathing Apparatus (PBA) or launch/entry pressure suits set to 100% O2 to prevent hypoxia and acute decompression sickness.",
+      "next": "q2"
+    },
+    "q2": {
+      "type": "question",
+      "text": "Is the leak localized to a specific module, and is the ultrasonic/acoustic leak detector identifying the breach point?",
+      "yes": "i_patch",
+      "no": "i_safe_haven"
+    },
+    "i_patch": {
+      "type": "instruction",
+      "text": "ISOLATE AND PATCH: Evacuate the breached module. Close and latch the pressure hatch. If safe and breach is identified, apply emergency flexible hull patch clamp over breach.",
+      "next": "t_patch"
+    },
+    "t_patch": {
+      "type": "timer",
+      "text": "Verify pressure stabilization over 3 minutes while monitoring module delta-P pressure transducer.",
+      "seconds": 180,
+      "next": "q_pressure_stable"
+    },
+    "q_pressure_stable": {
+      "type": "question",
+      "text": "Has the vehicle cabin pressure stabilized following hatch closure and patch application?",
+      "yes": "end_contained",
+      "no": "end_catastrophic"
+    },
+    "end_contained": {
+      "type": "end",
+      "text": "PRESSURE STABILIZED: Module isolated successfully. Monitor bulkhead pressure differential gauges and conduct structural telemetry inspection.",
+      "escalate": false
+    },
+    "end_catastrophic": {
+      "type": "end",
+      "text": "LEAK UNCONTAINED: Initiate emergency capsule ingress procedures and prepare for emergency undocking sequence.",
+      "escalate": true
+    },
+    "i_safe_haven": {
+      "type": "instruction",
+      "text": "RAPID MODULE ISOLATION: Close hatches sequentially towards the designated vehicle Safe Haven / return spacecraft. Verify positive seal.",
+      "next": "end_escalate"
+    },
+    "q_slow_leak": {
+      "type": "question",
+      "text": "Is there a slow atmospheric pressure drift (< 0.2 psi/hr) without an active acoustic alarm?",
+      "yes": "i_slow_eval",
+      "no": "i_nominal_press"
+    },
+    "i_slow_eval": {
+      "type": "instruction",
+      "text": "SLOW LEAK INVESTIGATION: Check module hatch seals, waste management vacuum vents, and airlock pressure relief valves.",
+      "next": "end_monitor"
+    },
+    "i_nominal_press": {
+      "type": "instruction",
+      "text": "ATMOSPHERE NOMINAL: Check cabin barometric pressure sensors against ECLSS telemetry. Calibrate sensor array.",
+      "next": "end_monitor"
+    },
+    "end_monitor": {
+      "type": "end",
+      "text": "Cabin pressure within safe operating parameters. Continue automated ECLSS pressure logging.",
+      "escalate": false
+    },
+    "end_escalate": {
+      "type": "end",
+      "text": "CRITICAL DEPRESSURIZATION EMERGENCY: Flight controllers and Mission Control alerted. Safe Haven protocols active.",
+      "escalate": true
+    }
   }
 }

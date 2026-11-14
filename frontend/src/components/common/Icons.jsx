@@ -223,6 +223,20 @@ export function Icon({ name, size = 18, className = '', color = 'currentColor' }
           <polyline points="12 19 5 12 12 5" />
         </svg>
       );
+    case 'arrow-right':
+      return (
+        <svg {...props}>
+          <line x1="5" y1="12" x2="19" y2="12" />
+          <polyline points="12 5 19 12 12 19" />
+        </svg>
+      );
+    case 'send':
+      return (
+        <svg {...props}>
+          <line x1="22" y1="2" x2="11" y2="13" />
+          <polygon points="22 2 15 22 11 13 2 9 22 2" />
+        </svg>
+      );
     case 'refresh':
       return (
         <svg {...props}>
@@ -230,6 +244,22 @@ export function Icon({ name, size = 18, className = '', color = 'currentColor' }
           <path d="M3 3v5h5" />
           <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
           <path d="M16 21h5v-5" />
+        </svg>
+      );
+    case 'volume':
+    case 'speaker':
+      return (
+        <svg {...props}>
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+          <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+        </svg>
+      );
+    case 'volume-off':
+    case 'stop':
+      return (
+        <svg {...props}>
+          <rect x="6" y="6" width="12" height="12" rx="2" />
         </svg>
       );
     default:

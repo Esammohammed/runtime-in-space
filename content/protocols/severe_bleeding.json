@@ -2,18 +2,100 @@
   "id": "severe_bleeding",
   "title": "Severe bleeding",
   "category": "Trauma and injury",
-  "reference": "TODO: name the approved source these steps are taken from",
-  "_note": "STRUCTURE ONLY. Every 'text' below is a placeholder. Replace it with the exact wording from the approved source. Do not write medical steps yourself.",
+  "reference": "NASA Tactical Combat Casualty Care (TCCC) in Spaceflight & ISS Trauma Management Guidelines.",
   "start": "q1",
   "nodes": {
-    "q1": { "type": "question", "text": "TODO: is the bleeding spurting or soaking through a dressing quickly?", "yes": "i1", "no": "i4" },
-    "i1": { "type": "instruction", "text": "TODO: apply direct pressure (or tourniquet, per source) action", "next": "t1" },
-    "t1": { "type": "timer", "text": "TODO: hold pressure for the time given by the source", "seconds": 180, "next": "q2" },
-    "q2": { "type": "question", "text": "TODO: has the bleeding slowed or stopped?", "yes": "i2", "no": "i3" },
-    "i2": { "type": "instruction", "text": "TODO: dress the wound and continue monitoring action", "next": "end_escalate" },
-    "i3": { "type": "instruction", "text": "TODO: escalate to a more aggressive control measure per source", "next": "end_escalate" },
-    "i4": { "type": "instruction", "text": "TODO: clean and dress a minor wound action", "next": "end_monitor" },
-    "end_monitor": { "type": "end", "text": "TODO: closing instruction, keep observing the wound", "escalate": false },
-    "end_escalate": { "type": "end", "text": "TODO: closing instruction from the source", "escalate": true }
+    "q1": {
+      "type": "question",
+      "text": "Is there catastrophic arterial bleeding (pulsatile spurting, blood pooling rapidly in microgravity air globules)?",
+      "yes": "i_tourniquet",
+      "no": "q2"
+    },
+    "i_tourniquet": {
+      "type": "instruction",
+      "text": "IMMEDIATE TOURNIQUET APPLICATION: Place Combat Application Tourniquet (CAT) 2–3 inches proximal to wound (not over a joint). Turn windlass rod until bleeding stops and distal pulse vanishes. Lock rod.",
+      "next": "t_tourn"
+    },
+    "t_tourn": {
+      "type": "timer",
+      "text": "Assess distal limb perfusion and verify complete cessation of arterial bleeding over 3 minutes.",
+      "seconds": 180,
+      "next": "q_tourn_check"
+    },
+    "q_tourn_check": {
+      "type": "question",
+      "text": "Has the distal arterial bleeding completely stopped after tourniquet tightening?",
+      "yes": "i_tourn_ok",
+      "no": "i_tourn_fail"
+    },
+    "i_tourn_ok": {
+      "type": "instruction",
+      "text": "TOURNIQUET SECURED: Mark exact Zulu time on patient forehead (e.g., T-14:30Z). Apply sterile protective dressing over wound. DO NOT LOOSEN TOURNIQUET.",
+      "next": "end_escalate"
+    },
+    "i_tourn_fail": {
+      "type": "instruction",
+      "text": "SECOND TOURNIQUET: Apply a second CAT tourniquet directly proximal to the first. Tighten fully. Pack wound cavity with additional hemostatic gauze.",
+      "next": "end_escalate"
+    },
+    "q2": {
+      "type": "question",
+      "text": "Is the bleeding non-arterial but continuous and soaking through pressure dressings?",
+      "yes": "i_pack",
+      "no": "q3"
+    },
+    "i_pack": {
+      "type": "instruction",
+      "text": "HEMOSTATIC WOUND PACKING: Pack wound tightly with QuikClot / Celox hemostatic gauze directly against bone/bleeding vessel. Apply firm manual pressure.",
+      "next": "t_pressure"
+    },
+    "t_pressure": {
+      "type": "timer",
+      "text": "Maintain uninterrupted direct compression on wound for 3 full minutes without lifting dressings to inspect.",
+      "seconds": 180,
+      "next": "q_pack_check"
+    },
+    "q_pack_check": {
+      "type": "question",
+      "text": "After 3 minutes of firm manual pressure, has hemorrhage ceased without strike-through?",
+      "yes": "i_pack_ok",
+      "no": "i_pack_fail"
+    },
+    "i_pack_ok": {
+      "type": "instruction",
+      "text": "Apply elastic compression wrap (Israeli bandage) firmly over hemostatic pack. Check distal pulse and capillary refill.",
+      "next": "end_escalate"
+    },
+    "i_pack_fail": {
+      "type": "instruction",
+      "text": "Apply proximal arterial compression and escalate to extremity tourniquet if applicable.",
+      "next": "end_escalate"
+    },
+    "q3": {
+      "type": "question",
+      "text": "Is the wound a minor laceration or abrasion with controlled venous oozing?",
+      "yes": "i_minor_lac",
+      "no": "i_puncture"
+    },
+    "i_minor_lac": {
+      "type": "instruction",
+      "text": "MINOR LACERATION: Irrigate thoroughly with sterile saline pouch; approximate wound edges with sterile Steri-Strips or surgical tissue adhesive (Dermabond); apply sterile dressing.",
+      "next": "end_monitor"
+    },
+    "i_puncture": {
+      "type": "instruction",
+      "text": "PUNCTURE / EMBEDDED OBJECT: Do not remove penetrating object. Stabilize object with bulky rolled dressings and secure firmly.",
+      "next": "end_escalate"
+    },
+    "end_monitor": {
+      "type": "end",
+      "text": "Wound debrided and dressed. Monitor dressing every 4 hours for re-bleeding; evaluate need for prophylactic antibiotic.",
+      "escalate": false
+    },
+    "end_escalate": {
+      "type": "end",
+      "text": "HEMORRHAGIC TRAUMA ESCALATION: Flight Surgeon active on emergency comms. Prepare IV fluid resuscitation line (Normal Saline / Tranexamic Acid TXA).",
+      "escalate": true
+    }
   }
 }

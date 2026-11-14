@@ -1,8 +1,11 @@
 import { useEffect, useState, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import Card from '@/components/common/Card.jsx';
 import { Icon } from '@/components/common/Icons.jsx';
+import SpeakButton from '@/components/common/SpeakButton.jsx';
 import { useCrew } from '@/context/CrewContext.jsx';
 import { analyzeImage, downloadPhotoReport, fetchSampleImage, listSampleImages } from '@/services/assistantService.js';
+import { addFinding, CLINICAL_LOCATIONS } from '@/services/clinicalFindingsService.js';
 
 const URGENCY_CONFIG = {
   watch: { label: 'Keep Watching', color: 'var(--amber)', class: 'status-yellow' },
@@ -21,14 +24,43 @@ const toBase64 = (file) =>
 export default function PhotoCheckPage() {
   const { selectedId } = useCrew();
   const [note, setNote] = useState('');
+  const [selectedLocation, setSelectedLocation] = useState('right_hand');
+  const [isPinned, setIsPinned] = useState(false);
   const [result, setResult] = useState(null);
   const [photo, setPhoto] = useState(null);
   const [samples, setSamples] = useState([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const [selectedFileName, setSelectedFileName] = useState('');
+  const [streamedDesc, setStreamedDesc] = useState('');
+  const [isStreaming, setIsStreaming] = useState(false);
 
   const fileInputRef = useRef(null);
+  const streamTimerRef = useRef(null);
+
+  const onNoteChange = (text) => {
+    setNote(text);
+    const low = text.toLowerCase();
+    if (low.includes('left hand') || low.includes('left arm') || low.includes('left forearm')) {
+      setSelectedLocation('left_hand');
+    } else if (low.includes('right hand') || low.includes('right arm') || low.includes('hand') || low.includes('forearm') || low.includes('arm') || low.includes('wrist')) {
+      setSelectedLocation('right_hand');
+    } else if (low.includes('head') || low.includes('face') || low.includes('eye') || low.includes('forehead')) {
+      setSelectedLocation('head');
+    } else if (low.includes('chest') || low.includes('torso') || low.includes('abdomen') || low.includes('belly')) {
+      setSelectedLocation('torso');
+    } else if (low.includes('left leg') || low.includes('left knee') || low.includes('left thigh')) {
+      setSelectedLocation('left_leg');
+    } else if (low.includes('right leg') || low.includes('leg') || low.includes('knee') || low.includes('thigh')) {
+      setSelectedLocation('right_leg');
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (streamTimerRef.current) clearInterval(streamTimerRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     listSampleImages()
@@ -51,7 +83,45 @@ export default function PhotoCheckPage() {
   const analyze = async (blob) => {
     const base64 = await toBase64(blob);
     setPhoto({ base64, mimeType: blob.type });
-    setResult(await analyzeImage(selectedId, base64, blob.type, note.trim()));
+    const res = await analyzeImage(selectedId, base64, blob.type, note.trim());
+    setResult(res);
+
+    // Auto-pin finding directly onto 3D Astronaut Mannequin
+    const locMeta = CLINICAL_LOCATIONS[selectedLocation];
+    addFinding(selectedId, {
+      location: selectedLocation,
+      locationLabel: locMeta?.label || 'Right Hand / Forearm',
+      title: res.description
+        ? (res.description.length > 50 ? res.description.slice(0, 48) + '…' : res.description)
+        : 'Vision Finding',
+      description: res.description,
+      next_step: res.next_step,
+      urgency: res.urgency,
+      source: 'Photo Check (Vision AI)',
+    });
+    setIsPinned(true);
+
+    // Streaming typing animation for the visual assessment description
+    const fullDesc = res?.description || '';
+    const words = fullDesc.split(' ');
+    let index = 0;
+    let currentText = '';
+    setStreamedDesc('');
+    setIsStreaming(true);
+
+    if (streamTimerRef.current) clearInterval(streamTimerRef.current);
+    streamTimerRef.current = setInterval(() => {
+      if (index < words.length) {
+        currentText += (index === 0 ? '' : ' ') + words[index];
+        index++;
+        setStreamedDesc(currentText);
+      } else {
+        clearInterval(streamTimerRef.current);
+        streamTimerRef.current = null;
+        setStreamedDesc(fullDesc);
+        setIsStreaming(false);
+      }
+    }, 28);
   };
 
   const onPhoto = (event) => {
@@ -113,8 +183,32 @@ export default function PhotoCheckPage() {
               placeholder="e.g. onset 2 days ago, mild pruritus, location right forearm…"
               className="photo-textarea"
               value={note}
-              onChange={(event) => setNote(event.target.value)}
+              onChange={(event) => onNoteChange(event.target.value)}
             />
+          </div>
+
+          {/* Anatomical Body Location Selector */}
+          <div className="photo-field-group">
+            <div className="photo-location-label-row">
+              <label className="photo-field-label">
+                Target Body Location <span className="muted small">(Maps to 3D Astronaut Hologram)</span>
+              </label>
+              <span className="location-active-tag">
+                📍 {CLINICAL_LOCATIONS[selectedLocation]?.label}
+              </span>
+            </div>
+            <div className="location-pills-row">
+              {Object.values(CLINICAL_LOCATIONS).map((loc) => (
+                <button
+                  key={loc.id}
+                  type="button"
+                  className={`location-pill-btn ${selectedLocation === loc.id ? 'active' : ''}`}
+                  onClick={() => setSelectedLocation(loc.id)}
+                >
+                  {loc.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Upload Drop Zone / Button */}
@@ -192,7 +286,24 @@ export default function PhotoCheckPage() {
           className="finding-card mt-3"
         >
           <div className="finding-body">
-            <div className="finding-urgency-banner">
+            {/* Hologram Pinned Alert Banner */}
+            <div className="finding-pinned-banner">
+              <div className="pinned-left">
+                <span className="pinned-sonar-dot" />
+                <div className="pinned-texts">
+                  <span className="pinned-title">Mapped to 3D Hologram</span>
+                  <span className="pinned-sub muted small">
+                    Beacon active on <strong>{CLINICAL_LOCATIONS[selectedLocation]?.label}</strong>
+                  </span>
+                </div>
+              </div>
+              <Link to="/" className="pinned-view-link">
+                <span>View on 3D Model</span>
+                <Icon name="arrow-right" size={13} />
+              </Link>
+            </div>
+
+            <div className="finding-urgency-banner mt-2">
               <span className="urgency-caption muted small">Triage Urgency Level:</span>
               <span className={`urgency-pill ${urgencyMeta.class}`}>
                 {urgencyMeta.label}
@@ -200,8 +311,19 @@ export default function PhotoCheckPage() {
             </div>
 
             <div className="finding-section">
-              <h4 className="finding-subheading">Visual Assessment Finding</h4>
-              <p className="finding-text">{result.description}</p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                <h4 className="finding-subheading" style={{ margin: 0 }}>Visual Assessment Finding</h4>
+                {!isStreaming && result && (
+                  <SpeakButton
+                    text={`${result.description}. Recommended next step: ${result.next_step}`}
+                    label="Audio Briefing"
+                  />
+                )}
+              </div>
+              <p className="finding-text">
+                {streamedDesc || result.description}
+                {isStreaming && <span className="typing-cursor">▊</span>}
+              </p>
             </div>
 
             <div className="finding-section">
@@ -209,10 +331,13 @@ export default function PhotoCheckPage() {
               <p className="finding-text font-semibold text-white">{result.next_step}</p>
             </div>
 
-            <div className="row wrap mt-2">
+            <div className="row wrap gap-2 mt-3">
               <button type="button" className="button ghost" disabled={busy || !photo} onClick={onDownloadReport}>
                 Download PDF report
               </button>
+              <Link to="/" className="button primary">
+                Inspect 3D Mannequin →
+              </Link>
             </div>
           </div>
         </Card>

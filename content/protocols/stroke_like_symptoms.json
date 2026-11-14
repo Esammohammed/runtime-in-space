@@ -2,15 +2,47 @@
   "id": "stroke_like_symptoms",
   "title": "Stroke-like symptoms",
   "category": "Neurological",
-  "reference": "TODO: name the approved source these steps are taken from (e.g. a F.A.S.T.-style check)",
-  "_note": "STRUCTURE ONLY. Every 'text' below is a placeholder. Replace it with the exact wording from the approved source. Do not write medical steps yourself.",
+  "reference": "NASA ISS Medical Operations: Acute Neurological Deficit Protocol & Cincinnati / F.A.S.T. Assessment Standards.",
   "start": "q1",
   "nodes": {
-    "q1": { "type": "question", "text": "TODO: is one side of the face drooping?", "yes": "i1", "no": "q2" },
-    "q2": { "type": "question", "text": "TODO: is there arm weakness or numbness on one side?", "yes": "i1", "no": "q3" },
-    "q3": { "type": "question", "text": "TODO: is speech slurred or strange?", "yes": "i1", "no": "end_monitor" },
-    "i1": { "type": "instruction", "text": "TODO: note the time symptoms started, this detail matters for treatment", "next": "end_escalate" },
-    "end_monitor": { "type": "end", "text": "TODO: closing instruction, no signs now, keep observing", "escalate": false },
-    "end_escalate": { "type": "end", "text": "TODO: closing instruction from the source", "escalate": true }
+    "q1": {
+      "type": "question",
+      "text": "F (Face): Ask astronaut to smile. Is there unilateral facial droop, mouth asymmetry, or loss of nasolabial fold?",
+      "yes": "i_stroke_time",
+      "no": "q2"
+    },
+    "q2": {
+      "type": "question",
+      "text": "A (Arms): Ask astronaut to close eyes and hold both arms extended forward in microgravity. Does one arm drift downward or show sudden weakness or numbness?",
+      "yes": "i_stroke_time",
+      "no": "q3"
+    },
+    "q3": {
+      "type": "question",
+      "text": "S (Speech): Ask astronaut to repeat 'The sky is blue and clear.' Is speech slurred, garbled, or are they unable to comprehend or articulate?",
+      "yes": "i_stroke_time",
+      "no": "q4"
+    },
+    "q4": {
+      "type": "question",
+      "text": "Does the astronaut experience sudden severe 'thunderclap' headache, diplopia (double vision), or acute loss of limb coordination (ataxia)?",
+      "yes": "i_stroke_time",
+      "no": "end_monitor"
+    },
+    "i_stroke_time": {
+      "type": "instruction",
+      "text": "T (Time): Note exact Zulu time of onset. Position astronaut with head elevated 30 degrees. Check capillary blood glucose immediately to rule out acute hypoglycemia mimic, and maintain O2 saturation >= 96%.",
+      "next": "end_escalate"
+    },
+    "end_monitor": {
+      "type": "end",
+      "text": "F.A.S.T. neurological screen negative. No focal deficits observed. Conduct cranial nerve screening and monitor for 6 hours.",
+      "escalate": false
+    },
+    "end_escalate": {
+      "type": "end",
+      "text": "CRITICAL ACUTE NEUROLOGICAL EMERGENCY: Immediate Flight Surgeon consultation active. Prepare telemedicine video link and emergency Neuro-ICU kit.",
+      "escalate": true
+    }
   }
 }

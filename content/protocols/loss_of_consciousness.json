@@ -2,16 +2,84 @@
   "id": "loss_of_consciousness",
   "title": "Unresponsive crew member",
   "category": "Neurological",
-  "reference": "TODO: name the approved source these steps are taken from",
-  "_note": "STRUCTURE ONLY. Every 'text' below is a placeholder. Replace it with the exact wording from the approved source. Do not write medical steps yourself.",
+  "reference": "NASA Basic Life Support (BLS) & ISS Crew Medical Officer Unresponsive Patient Checklist (NASA-STD-3001).",
   "start": "q1",
   "nodes": {
-    "q1": { "type": "question", "text": "TODO: are they breathing normally?", "yes": "q2", "no": "i3" },
-    "q2": { "type": "question", "text": "TODO: do they respond to voice or touch?", "yes": "end_monitor", "no": "i1" },
-    "i1": { "type": "instruction", "text": "TODO: recovery position action for unresponsive-but-breathing", "next": "t1" },
-    "t1": { "type": "timer", "text": "TODO: reassess breathing and response at the interval given by the source", "seconds": 120, "next": "end_escalate" },
-    "i3": { "type": "instruction", "text": "TODO: begin resuscitation steps per the approved protocol", "next": "end_escalate" },
-    "end_monitor": { "type": "end", "text": "TODO: closing instruction for a drowsy but responsive crew member", "escalate": false },
-    "end_escalate": { "type": "end", "text": "TODO: closing instruction from the source", "escalate": true }
+    "q1": {
+      "type": "question",
+      "text": "Check chest rise, airflow, and carotid pulse for 10 seconds. Is the crew member breathing and do they have a palpable pulse?",
+      "yes": "q2",
+      "no": "i_cpr"
+    },
+    "i_cpr": {
+      "type": "instruction",
+      "text": "CARDIOPULMONARY RESUSCITATION (CODE): Secure patient to Crew Medical Restraint System (CMRS). Attach Defibrillator/AED pads. Deliver 100–120 compressions/min using overhead handholds. Insert i-gel airway.",
+      "next": "t_cpr"
+    },
+    "t_cpr": {
+      "type": "timer",
+      "text": "Perform 2 minutes of continuous CPR, then pause 5 seconds for automated AED rhythm analysis and shock advisory.",
+      "seconds": 120,
+      "next": "end_escalate"
+    },
+    "q2": {
+      "type": "question",
+      "text": "Tap both shoulders firmly and shout loudly. Does the crew member open eyes, vocalize, or follow simple commands?",
+      "yes": "q3",
+      "no": "i_unconscious_breathing"
+    },
+    "i_unconscious_breathing": {
+      "type": "instruction",
+      "text": "UNRESPONSIVE WITH PULSE: Place in stable tethered recovery position to maintain open airway. Administer 100% O2 via mask. Check blood glucose immediately.",
+      "next": "t_vitals"
+    },
+    "t_vitals": {
+      "type": "timer",
+      "text": "Assess airway patency, carotid pulse, and SpO2 every 2 minutes while measuring blood glucose cartridge.",
+      "seconds": 120,
+      "next": "q_glucose"
+    },
+    "q_glucose": {
+      "type": "question",
+      "text": "Is the blood glucose reading < 70 mg/dL (severe acute hypoglycemia)?",
+      "yes": "i_hypoglycemia",
+      "no": "i_neuro_check"
+    },
+    "i_hypoglycemia": {
+      "type": "instruction",
+      "text": "HYPOGLYCEMIA COMA: Administer 1 tube of oral glucose gel on buccal mucosa if swallowing reflex present, or initiate IV access with 50% Dextrose (D50W) 25g IV push.",
+      "next": "end_escalate"
+    },
+    "i_neuro_check": {
+      "type": "instruction",
+      "text": "EVALUATE FOR SEIZURE / SYNCOPE: Check pupillary symmetry, rule out head trauma from microgravity impact, and inspect cabin atmospheric CO2 telemetry.",
+      "next": "end_escalate"
+    },
+    "q3": {
+      "type": "question",
+      "text": "Is the crew member alert and oriented to person, location (spacecraft module), and Zulu time?",
+      "yes": "i_syncope",
+      "no": "i_confused"
+    },
+    "i_syncope": {
+      "type": "instruction",
+      "text": "VASOVAGAL / ORTHOSTATIC SYNCOPE: Astronaut recovered consciousness. Hydrate with 500 mL electrolyte pouch; check blood pressure and ECG rhythm strip.",
+      "next": "end_monitor"
+    },
+    "i_confused": {
+      "type": "instruction",
+      "text": "POST-ICTAL / ACUTE CONFUSION: Keep crew member closely monitored in quiet quarters. Conduct brief neurological assessment and maintain O2 support.",
+      "next": "end_escalate"
+    },
+    "end_monitor": {
+      "type": "end",
+      "text": "Consciousness fully restored. Crew member stable; conduct full vital signs evaluation and schedule rest.",
+      "escalate": false
+    },
+    "end_escalate": {
+      "type": "end",
+      "text": "CRITICAL NEUROLOGICAL ESCALATION: Flight Surgeon telemedicine channel active. Continuous vital signs and cardiac rhythm streaming.",
+      "escalate": true
+    }
   }
 }

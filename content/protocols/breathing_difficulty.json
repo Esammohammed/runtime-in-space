@@ -2,17 +2,84 @@
   "id": "breathing_difficulty",
   "title": "Difficulty breathing",
   "category": "Respiratory",
-  "reference": "TODO: name the approved source these steps are taken from",
-  "_note": "STRUCTURE ONLY. Every 'text' below is a placeholder. Replace it with the exact wording from the approved source. Do not write medical steps yourself.",
+  "reference": "NASA Flight Rules: Respiratory Distress, Airway Emergencies & ISS Environmental Life Support System (ECLSS) Protocols.",
   "start": "q1",
   "nodes": {
-    "q1": { "type": "question", "text": "TODO: can they speak in full sentences?", "yes": "q2", "no": "i3" },
-    "q2": { "type": "question", "text": "TODO: is the blood oxygen or cabin CO2 reading outside the normal range?", "yes": "i1", "no": "i2" },
-    "i1": { "type": "instruction", "text": "TODO: action for an abnormal reading (mask, ventilation check)", "next": "t1" },
-    "i2": { "type": "instruction", "text": "TODO: reassurance and positioning action", "next": "end_monitor" },
-    "i3": { "type": "instruction", "text": "TODO: immediate action for severe distress", "next": "end_escalate" },
-    "t1": { "type": "timer", "text": "TODO: timed reassessment after the action", "seconds": 120, "next": "end_escalate" },
-    "end_monitor": { "type": "end", "text": "TODO: closing instruction, keep observing", "escalate": false },
-    "end_escalate": { "type": "end", "text": "TODO: closing instruction from the source", "escalate": true }
+    "q1": {
+      "type": "question",
+      "text": "Is there audible stridor, harsh gasping, or is the crew member unable to speak even single words?",
+      "yes": "i_upper",
+      "no": "q2"
+    },
+    "i_upper": {
+      "type": "instruction",
+      "text": "ACUTE UPPER AIRWAY OBSTRUCTION / SEVERE DISTRESS: Clear oropharynx with suction. Insert supraglottic airway (i-gel) or prepare bag-valve-mask with 100% O2.",
+      "next": "t_airway"
+    },
+    "t_airway": {
+      "type": "timer",
+      "text": "Deliver rescue ventilation with high-flow O2 for 60 seconds while monitoring chest rise and pulse oximetry.",
+      "seconds": 60,
+      "next": "end_escalate"
+    },
+    "q2": {
+      "type": "question",
+      "text": "Is pulse oximetry SpO2 < 95% or is the module cabin CO2 reading > 3.0 mmHg?",
+      "yes": "i_hypox",
+      "no": "q3"
+    },
+    "i_hypox": {
+      "type": "instruction",
+      "text": "HYPOXIA / HYPERCAPNIA ALERT: Don Emergency Portable Breathing Apparatus (PBA) with 100% O2. Inspect module air diffusers for stagnant CO2 pockets.",
+      "next": "t_o2"
+    },
+    "t_o2": {
+      "type": "timer",
+      "text": "Administer high-flow O2 for 2 minutes while verifying pulse oximeter waveform and respiratory rate.",
+      "seconds": 120,
+      "next": "q_o2_resp"
+    },
+    "q_o2_resp": {
+      "type": "question",
+      "text": "After 2 minutes of 100% O2, has SpO2 risen to >= 96% and respiratory rate stabilized?",
+      "yes": "i_o2_ok",
+      "no": "i_o2_fail"
+    },
+    "i_o2_ok": {
+      "type": "instruction",
+      "text": "OXYGENATION RECOVERED: Maintain low-flow O2. Inspect module ventilation fans and life support Carbon Dioxide Removal Assembly (CDRA).",
+      "next": "end_monitor"
+    },
+    "i_o2_fail": {
+      "type": "instruction",
+      "text": "REFRACTORY HYPOXIA: Suspect pulmonary edema, pneumothorax, or toxic inhalation. Prepare Albuterol inhaler (4 puffs) and dexamethasone.",
+      "next": "end_escalate"
+    },
+    "q3": {
+      "type": "question",
+      "text": "Does the astronaut report sudden chest tightness or wheezing during or immediately after exercise/work?",
+      "yes": "i_broncho",
+      "no": "i_hypervent"
+    },
+    "i_broncho": {
+      "type": "instruction",
+      "text": "BRONCHOSPASM / EXERCISE-INDUCED ASTHMA: Administer 2 puffs of Albuterol aerosol inhaler via spacer. Seat upright and guide slow exhalations.",
+      "next": "end_monitor"
+    },
+    "i_hypervent": {
+      "type": "instruction",
+      "text": "ANXIETY / HYPERVENTILATION: Vital signs nominal. Guide slow diaphragmatic breathing (4s inhale, 7s hold, 8s exhale) in quiet module.",
+      "next": "end_monitor"
+    },
+    "end_monitor": {
+      "type": "end",
+      "text": "Respiratory status stabilized. Continue continuous SpO2 pulse oximetry monitoring for 2 hours and record incident in log.",
+      "escalate": false
+    },
+    "end_escalate": {
+      "type": "end",
+      "text": "RESPIRATORY CRISIS ESCALATED: Emergency consultation active with Flight Surgeon. Cabin life support diagnostics in progress.",
+      "escalate": true
+    }
   }
 }

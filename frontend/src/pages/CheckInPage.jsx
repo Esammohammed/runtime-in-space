@@ -134,28 +134,25 @@ export default function CheckInPage() {
                       <div className="field-input-side">
                         {isMood ? (
                           <div className="mood-selection-group">
-                            <div className="mood-pills-row">
+                            <div className="mood-pills-row" role="radiogroup" aria-label="Mood rating 1 to 5">
                               {MOOD_OPTIONS.map((opt) => (
                                 <button
                                   key={opt.val}
                                   type="button"
+                                  role="radio"
+                                  aria-checked={values[field.id] === String(opt.val)}
                                   className={`mood-pill-btn ${values[field.id] === String(opt.val) ? 'selected' : ''}`}
                                   onClick={() => setValues({ ...values, [field.id]: String(opt.val) })}
+                                  title={opt.label}
                                 >
                                   {opt.val}
                                 </button>
                               ))}
                             </div>
                             <input
+                              type="hidden"
                               id={field.id}
-                              type="number"
-                              min="1"
-                              max="5"
-                              step="1"
-                              placeholder="1 - 5"
-                              className="mood-numeric-input"
                               value={values[field.id] ?? ''}
-                              onChange={(e) => setValues({ ...values, [field.id]: e.target.value })}
                             />
                           </div>
                         ) : (

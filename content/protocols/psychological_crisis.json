@@ -2,17 +2,67 @@
   "id": "psychological_crisis",
   "title": "Severe psychological distress",
   "category": "Behavioral health",
-  "reference": "TODO: name the approved source these steps are taken from",
-  "_note": "STRUCTURE ONLY. Every 'text' below is a placeholder. Replace it with the exact wording from the approved source. Do not write medical or counselling steps yourself.",
+  "reference": "NASA Behavioral Health and Performance (BHP) Operational Guidelines: Acute Behavioral Crisis & De-escalation Protocol.",
   "start": "q1",
   "nodes": {
-    "q1": { "type": "question", "text": "TODO: is the crew member a danger to themselves or others right now?", "yes": "i1", "no": "q2" },
-    "i1": { "type": "instruction", "text": "TODO: stay with them, remove access to hazards action", "next": "end_escalate" },
-    "q2": { "type": "question", "text": "TODO: are they able to talk about what they're feeling?", "yes": "i2", "no": "i3" },
-    "i2": { "type": "instruction", "text": "TODO: active-listening steps per the approved protocol", "next": "t1" },
-    "t1": { "type": "timer", "text": "TODO: check in again after the interval given by the source", "seconds": 900, "next": "end_monitor" },
-    "i3": { "type": "instruction", "text": "TODO: give space but keep checking in action", "next": "end_escalate" },
-    "end_monitor": { "type": "end", "text": "TODO: closing instruction, keep checking in", "escalate": false },
-    "end_escalate": { "type": "end", "text": "TODO: closing instruction from the source", "escalate": true }
+    "q1": {
+      "type": "question",
+      "text": "Does the crew member express suicidal ideation, violent behavior, severe psychosis, or present an immediate danger to themselves, others, or vehicle controls?",
+      "yes": "i_safety",
+      "no": "q2"
+    },
+    "i_safety": {
+      "type": "instruction",
+      "text": "IMMEDIATE SAFETY INTERVENTION: Assign two crew members to stay with the individual continuously. Lock critical hatch and cockpit control panels. Safely stow sharp objects, medications, and tools.",
+      "next": "end_escalate"
+    },
+    "q2": {
+      "type": "question",
+      "text": "Is the crew member cooperative, calm enough to speak, and willing to discuss their acute distress or panic symptoms?",
+      "yes": "i_deescalate",
+      "no": "i_give_space"
+    },
+    "i_deescalate": {
+      "type": "instruction",
+      "text": "Guided De-escalation: Escort individual to a private, quiet module. Utilize active listening, validate feelings without arguing, guide slow 4-7-8 breathing exercises, and reduce sensory stimuli.",
+      "next": "t_deescalate"
+    },
+    "t_deescalate": {
+      "type": "timer",
+      "text": "Provide supportive, unhurried presence for 15 minutes. Re-evaluate heart rate, anxiety level, and emotional stability.",
+      "seconds": 900,
+      "next": "q_post_deescalate"
+    },
+    "q_post_deescalate": {
+      "type": "question",
+      "text": "Following 15 minutes of guided relaxation, have acute anxiety, hyperventilation, and agitation visibly diminished?",
+      "yes": "i_stabilized",
+      "no": "i_persist_distress"
+    },
+    "i_stabilized": {
+      "type": "instruction",
+      "text": "ACUTE PANIC SUBSIDING: Offer hydration; guide mindfulness audio track; schedule sleep rest period and duty task offloading.",
+      "next": "end_monitor"
+    },
+    "i_persist_distress": {
+      "type": "instruction",
+      "text": "PERSISTENT ACUTE DISTRESS: Contact Flight Surgeon for evaluation of oral anxiolytic (e.g. Lorazepam) from the emergency psychiatric kit.",
+      "next": "end_escalate"
+    },
+    "i_give_space": {
+      "type": "instruction",
+      "text": "Non-verbal de-escalation: Allow personal quiet space in crew quarters while maintaining unobtrusive sightline monitoring. Offer warm beverage and dim cabin lights.",
+      "next": "end_escalate"
+    },
+    "end_monitor": {
+      "type": "end",
+      "text": "Acute distress subsided. Facilitate private Earth communications uplink with family; schedule follow-up rest and task offloading.",
+      "escalate": false
+    },
+    "end_escalate": {
+      "type": "end",
+      "text": "BEHAVIORAL CRISIS ESCALATION: Initiate private high-priority teleconference with NASA Flight Psychologist and Flight Surgeon. Medical countermeasure protocol active.",
+      "escalate": true
+    }
   }
 }

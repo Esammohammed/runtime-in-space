@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Card from '@/components/common/Card.jsx';
 import { Icon } from '@/components/common/Icons.jsx';
+import SpeakButton from '@/components/common/SpeakButton.jsx';
 import { useCrew } from '@/context/CrewContext.jsx';
 import { ask } from '@/services/assistantService.js';
 
@@ -12,10 +13,18 @@ export default function AssistantPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const threadEndRef = useRef(null);
+  const streamTimerRef = useRef(null);
 
   useEffect(() => {
     threadEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }, [messages, busy]);
+
+  // Clean up any ongoing typing stream on unmount
+  useEffect(() => {
+    return () => {
+      if (streamTimerRef.current) clearInterval(streamTimerRef.current);
+    };
+  }, []);
 
   const onAsk = async (event) => {
     event.preventDefault();
@@ -24,27 +33,66 @@ export default function AssistantPage() {
     setError(null);
     setBusy(true);
     setQuestion('');
+
     const history = messages.map(({ role, content }) => ({ role, content }));
     setMessages((current) => [...current, { role: 'user', content: text }]);
+
     try {
       const reply = await ask(selectedId, text, history);
+      setBusy(false);
+
+      // Start streaming typing animation
+      const msgId = Date.now();
+      const fullAnswer = reply.answer || '';
+      const words = fullAnswer.split(' ');
+
+      // Add placeholder streaming message
       setMessages((current) => [
         ...current,
         {
+          id: msgId,
           role: 'assistant',
-          content: reply.answer,
+          content: '',
           sources: reply.sources,
           model: reply.model,
+          isStreaming: true,
         },
       ]);
+
+      let index = 0;
+      let currentText = '';
+
+      if (streamTimerRef.current) clearInterval(streamTimerRef.current);
+
+      streamTimerRef.current = setInterval(() => {
+        if (index < words.length) {
+          currentText += (index === 0 ? '' : ' ') + words[index];
+          index++;
+          setMessages((current) =>
+            current.map((msg) =>
+              msg.id === msgId ? { ...msg, content: currentText } : msg
+            )
+          );
+        } else {
+          clearInterval(streamTimerRef.current);
+          streamTimerRef.current = null;
+          setMessages((current) =>
+            current.map((msg) =>
+              msg.id === msgId
+                ? { ...msg, content: fullAnswer, isStreaming: false }
+                : msg
+            )
+          );
+        }
+      }, 26); // ~38 words per second, natural conversational pace
     } catch (askError) {
       setError(askError);
-    } finally {
       setBusy(false);
     }
   };
 
   const onNewChat = () => {
+    if (streamTimerRef.current) clearInterval(streamTimerRef.current);
     setMessages([]);
     setError(null);
   };
@@ -80,39 +128,48 @@ export default function AssistantPage() {
 
         {messages.map((message, index) =>
           message.role === 'user' ? (
-            <div key={index} className="chat-bubble-row user-bubble-row">
+            <div key={message.id || index} className="chat-bubble-row user-bubble-row">
               <div className="chat-bubble user-bubble">
-                <p className="chat-message-text">{message.content}</p>
+                <p className="chat-message-text" dir="auto">{message.content}</p>
               </div>
             </div>
           ) : (
-            <div key={index} className="chat-bubble-row assistant-bubble-row">
+            <div key={message.id || index} className="chat-bubble-row assistant-bubble-row">
               <div className="chat-bubble assistant-bubble">
                 <div className="bubble-header-row">
                   <span className="bubble-assistant-tag">
                     <Icon name="assistant" size={14} color="var(--cyan)" />
                     <span>AstroHealth Medical AI</span>
                   </span>
-                  {message.model && (
-                    <span className="bubble-model-chip muted small">
-                      Model: {message.model}
-                    </span>
-                  )}
+                  <div className="bubble-header-actions" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    {message.content && !message.isStreaming && (
+                      <SpeakButton text={message.content} label="Audio Guidance" />
+                    )}
+                    {message.model && (
+                      <span className="bubble-model-chip muted small">
+                        Model: {message.model}
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <p className="chat-message-text prewrap">{message.content}</p>
 
-                {/* Sources list */}
-                {message.sources && message.sources.length > 0 && (
+                <div className="chat-message-text prewrap" dir="auto">
+                  {message.content}
+                  {message.isStreaming && <span className="typing-cursor">▊</span>}
+                </div>
+
+                {/* Verified Sources — Clean citation badges, no unreadable raw text snippets */}
+                {!message.isStreaming && message.sources && message.sources.length > 0 && (
                   <div className="chat-sources-block">
-                    <h4 className="sources-title">
-                      <Icon name="book" size={13} />
-                      <span>Verified NASA Reference Sources:</span>
-                    </h4>
-                    <div className="sources-list">
-                      {message.sources.map((source, sourceIndex) => (
-                        <div key={sourceIndex} className="source-item">
-                          <strong className="source-name">{source.title}</strong>
-                          <p className="source-snippet muted small">{source.snippet}</p>
+                    <div className="sources-header-line">
+                      <Icon name="book" size={13} color="var(--cyan)" />
+                      <span className="sources-title-text">Verified NASA Reference Sources:</span>
+                    </div>
+                    <div className="sources-pills-row">
+                      {[...new Set(message.sources.map((s) => s.title))].map((title, sIdx) => (
+                        <div key={sIdx} className="source-citation-pill" title={`Referenced in NASA clinical library: ${title}`}>
+                          <span className="source-doc-icon">📄</span>
+                          <span className="source-doc-title">{title}</span>
                         </div>
                       ))}
                     </div>
@@ -129,56 +186,65 @@ export default function AssistantPage() {
               <div className="typing-dots">
                 <span /><span /><span />
               </div>
-              <span className="muted small">Searching flight medicine documentation…</span>
+              <span className="muted small">Searching flight medicine documentation & generating answer…</span>
             </div>
           </div>
         )}
         <div ref={threadEndRef} />
       </div>
 
-      {/* Robust Input Form Card */}
+      {/* Input Form Card */}
       <Card className="chat-input-card">
-        <form onSubmit={onAsk} className="chat-form">
-          <div className="chat-input-wrap">
+        <form onSubmit={onAsk} className="chat-input-form">
+          <div className="chat-input-wrapper">
             <textarea
-              id="question"
+              id="chat-question-input"
               rows={2}
-              placeholder={messages.length === 0 ? 'Describe a symptom or clinical question…' : 'Ask a follow-up question…'}
-              className="chat-textarea"
               value={question}
-              onChange={(event) => setQuestion(event.target.value)}
+              onChange={(e) => setQuestion(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
-                  onAsk(e);
+                  if (question.trim() && !busy) {
+                    onAsk(e);
+                  }
                 }
               }}
+              placeholder="Ask about symptoms, space adaptation syndrome, radiation protocols, or medication… (Press Enter to send)"
+              className="chat-textarea"
+              disabled={busy}
+              autoFocus
             />
           </div>
 
           <div className="chat-actions-row">
             <button
-              type="submit"
-              className="button primary-gradient-btn"
-              disabled={busy || !question.trim()}
+              type="button"
+              className="button ghost chat-action-btn"
+              onClick={onNewChat}
+              disabled={busy || messages.length === 0}
             >
-              <Icon name="quick" size={16} color="#070C15" />
-              <span>{busy ? 'Consulting…' : 'Send Question'}</span>
+              <Icon name="refresh" size={15} />
+              <span>New consultation</span>
             </button>
 
-            {messages.length > 0 && (
-              <button
-                type="button"
-                className="button ghost"
-                onClick={onNewChat}
-                disabled={busy}
-              >
-                Clear Conversation
-              </button>
-            )}
+            <button
+              type="submit"
+              className="button primary-gradient-btn chat-send-btn"
+              disabled={busy || !question.trim()}
+            >
+              <Icon name="send" size={15} />
+              <span>{busy ? 'Consulting…' : 'Ask Assistant'}</span>
+            </button>
           </div>
-          {error && <p className="error small mt-2">{error.message}</p>}
         </form>
+
+        {error && (
+          <div className="chat-error-banner mt-2" role="alert">
+            <Icon name="alert-triangle" size={16} color="var(--coral)" />
+            <span>{error.message}</span>
+          </div>
+        )}
       </Card>
     </div>
   );
