@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Card from '@/components/common/Card.jsx';
 import { Icon } from '@/components/common/Icons.jsx';
@@ -11,6 +11,11 @@ export default function AssistantPage() {
   const [messages, setMessages] = useState([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
+  const threadEndRef = useRef(null);
+
+  useEffect(() => {
+    threadEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }, [messages, busy]);
 
   const onAsk = async (event) => {
     event.preventDefault();
@@ -128,6 +133,7 @@ export default function AssistantPage() {
             </div>
           </div>
         )}
+        <div ref={threadEndRef} />
       </div>
 
       {/* Robust Input Form Card */}

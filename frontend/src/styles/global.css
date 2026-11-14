@@ -222,6 +222,8 @@ button {
 }
 
 .main-content-column {
+  position: relative;
+  z-index: 1;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -819,6 +821,14 @@ button {
   display: grid;
   grid-template-columns: 1.45fr 1fr;
   gap: 18px;
+}
+
+.grid-col-health,
+.grid-col-hazards {
+  /* Grid items default to min-width: auto, so nowrap/ellipsis text inside
+     (e.g. the hazard metrics preview) was forcing the column -- and the
+     whole card -- wider than its 1fr share instead of truncating. */
+  min-width: 0;
 }
 
 @media (max-width: 1100px) {
@@ -1499,6 +1509,20 @@ button {
   }
 }
 
+/* Native number-input spinner arrows render as a light OS widget that
+   clashes with this dark theme -- replaced with nothing; these fields
+   already have custom styling, units and mood pills instead. */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
 .telemetry-input-container {
   display: flex;
   align-items: center;
@@ -1672,6 +1696,20 @@ button {
   flex-direction: column;
   gap: 14px;
   min-height: 260px;
+  max-height: 58vh;
+  overflow-y: auto;
+  padding-right: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(85, 198, 213, 0.35) transparent;
+}
+
+.chat-thread-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-thread-container::-webkit-scrollbar-thumb {
+  background: rgba(85, 198, 213, 0.35);
+  border-radius: 999px;
 }
 
 .chat-welcome-card {
@@ -2689,4 +2727,227 @@ button {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* ==========================================================================
+   IDENTITY GATE (crew picker + "Register New Astronaut" shown before login)
+   ========================================================================== */
+.identity-gate-wrapper {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 60px 20px;
+}
+
+.identity-page-modal {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 760px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.identity-brand-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.identity-main-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 6px 0 0;
+}
+
+.identity-tagline {
+  margin: 0 0 4px;
+}
+
+.emergency-gate-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(230, 109, 120, 0.35);
+  background: rgba(230, 109, 120, 0.08);
+  color: var(--coral);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+.emergency-gate-pill:hover {
+  background: rgba(230, 109, 120, 0.16);
+}
+
+.state-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  padding: 32px 24px;
+  border-radius: var(--radius-card);
+  background: var(--space);
+  border: 1px solid var(--card-border);
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 3px solid rgba(85, 198, 213, 0.2);
+  border-top-color: var(--cyan);
+  animation: identity-spin 0.8s linear infinite;
+}
+
+@keyframes identity-spin {
+  to { transform: rotate(360deg); }
+}
+
+.error-card {
+  border-color: rgba(230, 109, 120, 0.3);
+}
+
+.error-title {
+  font-weight: 700;
+  color: var(--coral);
+  margin: 0;
+}
+
+/* Crew roster tiles */
+.crew-selection-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 10px;
+}
+
+.crew-member-tile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--radius-input);
+  background: #0B1320;
+  border: 1px solid var(--card-border);
+  color: var(--text);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+
+.crew-member-tile:hover {
+  border-color: var(--card-border-hover);
+  background: var(--space-surface-hover);
+  transform: translateY(-1px);
+}
+
+.tile-avatar-circle {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(85, 198, 213, 0.12);
+  border: 1px solid rgba(85, 198, 213, 0.3);
+  color: var(--cyan);
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.tile-text-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.tile-name {
+  font-size: 14px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tile-role {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Register-new-astronaut form */
+.astro-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.astro-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.astro-field-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.astro-text-input {
+  width: 100%;
+  height: 42px;
+  padding: 0 14px;
+  border-radius: var(--radius-input);
+  background: #0B1320;
+  border: 1px solid rgba(85, 198, 213, 0.25);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.astro-text-input::placeholder {
+  color: var(--muted);
+}
+
+.astro-text-input:focus {
+  outline: none;
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 2px rgba(85, 198, 213, 0.2);
+}
+
+.form-error-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: var(--radius-input);
+  background: rgba(230, 109, 120, 0.1);
+  border: 1px solid rgba(230, 109, 120, 0.3);
+  color: var(--coral);
+  font-size: 13px;
+}
+
+.form-actions-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
 }
