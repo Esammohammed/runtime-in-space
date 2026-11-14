@@ -21,11 +21,14 @@ const STATUS_COLORS = {
 // 3D coordinates for hotspots on the mannequin model
 const ANATOMICAL_POSITIONS = {
   // Core Systemic Vitals
-  head: { x: 0, y: 1.84, z: 0.30, type: 'vital', label: 'Head and mind' },
+  head: { x: 0, y: 1.86, z: 0.42, type: 'vital', label: 'Head and mind' },
   heart: { x: -0.09, y: 1.15, z: 0.28, type: 'vital', label: 'Heart and vessels' },
   lungs: { x: 0.09, y: 1.25, z: 0.26, type: 'vital', label: 'Lungs' },
+  body: { x: 0, y: 0.4, z: 0.25, type: 'vital', label: 'Whole body' },
+
   metabolism: { x: 0, y: 0.65, z: 0.28, type: 'vital', label: 'Metabolism' },
-  body: { x: 0, y: 0.08, z: 0.25, type: 'vital', label: 'Whole body' },
+  // Note: "Whole body" is systemic (temperature & radiation) and has no localized anatomical organ point,
+  // avoiding an awkward marker in the pelvic/groin area. Selecting "Whole body" activates full-body scanner rings.
   // Clinical / Extremities (Dynamic AI Vision Hotspots)
   right_hand: { x: 0.60, y: 0.22, z: 0.18, type: 'clinical', label: 'Right Hand / Forearm' },
   left_hand: { x: -0.60, y: 0.22, z: 0.18, type: 'clinical', label: 'Left Hand / Forearm' },
@@ -410,6 +413,18 @@ export default function BodyMap({
 
       // Scanner ring up and down motion
       scanRing.position.y = Math.sin(elapsedTime * 1.5) * 1.5 + 0.1;
+
+      // When "Whole body" is selected, highlight the full-body scanner ring (systemic scan feedback)
+      const isBodySelected = selectedRef.current === 'body';
+      if (isBodySelected) {
+        const bodyStatus = (areasRef.current || {}).body;
+        const bodyHex = STATUS_COLORS[bodyStatus] ?? STATUS_COLORS.none;
+        scanRingMat.color.setHex(bodyHex);
+        scanRingMat.opacity = 0.55 + Math.sin(elapsedTime * 4.0) * 0.2;
+      } else {
+        scanRingMat.color.setHex(0x4eaab9);
+        scanRingMat.opacity = 0.25;
+      }
 
       // Invert mannequinGroup quaternion so child billboard rings always face camera
       const parentInvQuat = mannequinGroup.quaternion.clone().invert();
